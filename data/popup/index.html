@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="index.css">
+</head>
+<body>
+  <div id="form">
+    <input type="search" id="search" autofocus placeholder="search active document">
+    <span id="stat">0/0</span>
+    <span class="sep"></span>
+    <select id="separator" title="Use this character to split the query into sub-queries">
+      <option value=" ">[ ]</option>
+      <option value=",">[,]</option>
+      <option value=";">[;]</option>
+      <option value="false">[n]</option>
+    </select>
+    <span class="sep"></span>
+    <input type="button" id="backward" title="Press [Shift + Enter]" disabled="true">
+    <input type="button" id="forward" title="Press [Enter]" disabled="true">
+    <input type="button" id="close" title="Press [ESC]">
+  </div id="form">
+  <script type="text/javascript" src="/app.js/base.js"></script>
+  <script type="text/javascript" src="index.js"></script>
+</body>
+</html>

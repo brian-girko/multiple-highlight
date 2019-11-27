@@ -1,0 +1,69 @@
+.mark00,
+.mark01,
+.mark02,
+.mark03,
+.mark04,
+.mark05,
+.mark06,
+.mark07,
+.mark08,
+.mark09 {
+  color: #666;
+  background: #fff5cc;
+}
+.mark10,
+.mark11,
+.mark12,
+.mark13,
+.mark14,
+.mark15,
+.mark16,
+.mark17,
+.mark18,
+.mark19 {
+  color: #666;
+  background: #b4ff00;
+}
+.mark20,
+.mark21,
+.mark22,
+.mark23,
+.mark24,
+.mark25,
+.mark26,
+.mark27,
+.mark28,
+.mark29 {
+  color: #666;
+  background: #ffc600;
+}
+.mark30,
+.mark31,
+.mark32,
+.mark33,
+.mark34,
+.mark35,
+.mark36,
+.mark37,
+.mark38,
+.mark39 {
+  color: #fff;
+  background: #fc11ff;
+}
+.mark40,
+.mark41,
+.mark42,
+.mark43,
+.mark44,
+.mark45,
+.mark46,
+.mark47,
+.mark48,
+.mark49 {
+  color: #666;
+  background: #ff0;
+}
+mark[data-markjs="true"][data-active="true"] {
+  color: #303b49;
+  background-color: #abd1ff;
+}
