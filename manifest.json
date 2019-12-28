@@ -1,12 +1,13 @@
 {
   "manifest_version": 2,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "Multiple Highlight",
   "description": "Highlight multiple words separated by comma, space or arbitrary separator with regular expression support",
   "permissions": [
     "storage",
     "activeTab"
    ],
+  "homepage_url": "https://add0n.com/multiple-highlight.html",
    "background": {
     "persistant": false,
     "scripts": [
@@ -27,5 +28,12 @@
     "32": "data/icons/32.png",
     "19": "data/icons/19.png",
     "16": "data/icons/16.png"
+  },
+  "commands": {
+    "_execute_browser_action": {}
+  },
+  "options_ui": {
+    "page": "data/options/index.html",
+    "chrome_style": true
   }
 }

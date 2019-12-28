@@ -11,11 +11,15 @@ const prefs = {
     behavior: 'auto',
     block: 'center'
   },
-  'separator': ' '
+  'separator': ' ',
+  'persistent': false,
+  'clean-on-esc': true,
+  'close-on-esc': true
 };
 
 app.storage.get(prefs).then(async ps => {
   Object.assign(prefs, ps);
+
   separator.value = prefs.separator;
   try {
     await Promise.all([
@@ -26,18 +30,28 @@ app.storage.get(prefs).then(async ps => {
         file: '/data/inject/inject.css'
       })
     ]);
-    await app.tabs.inject.js({
+
+    const updateStat = request => {
+      stat.total = 'total' in request ? request.total : stat.total;
+      stat.textContent = (request.offset || 0) + '/' + (stat.total || 0);
+      backward.disabled = forward.disabled = [0, 1].indexOf(request.total) !== -1;
+    };
+
+    const o = (await app.tabs.inject.js({
       file: '/data/inject/control.js'
-    });
+    })).filter(o => o).shift();
+    if (o) {
+      search.value = o.query || '';
+      updateStat(o);
+    }
+
     const tab = await app.tabs.current();
     const port = app.runtime.connect(tab.id, {
       name: 'highlight'
     });
     port.on('message', request => {
       if (request.method === 'stat') {
-        stat.total = 'total' in request ? request.total : stat.total;
-        stat.textContent = (request.offset || 0) + '/' + stat.total;
-        backward.disabled = forward.disabled = [0, 1].indexOf(request.total) !== -1;
+        updateStat(request);
       }
     });
     const input = e => {
@@ -79,6 +93,14 @@ app.storage.get(prefs).then(async ps => {
       type: 'forward',
       prefs
     }));
+    document.getElementById('close').addEventListener('click', e => {
+      if (e.shiftKey) {
+        port.post({
+          method: 'persistent'
+        });
+      }
+      window.close();
+    });
   }
   catch (e) {
     search.value = e.message;
@@ -94,13 +116,32 @@ search.addEventListener('search', e => {
   search.esc = e.target.value ? false : true;
 });
 search.addEventListener('input', e => {
-  if (e.target.value) {
-    search.esc = false;
-  }
+  search.esc = e.target.value === '';
 });
-document.getElementById('close').addEventListener('click', () => window.close());
 
 // storage
 separator.addEventListener('change', e => app.storage.set({
   separator: e.target.value
 }));
+
+// auto focus
+document.addEventListener('DOMContentLoaded', () => {
+  window.setTimeout(() => search.focus(), 0);
+});
+
+// prevent ESC from cleaning the search box
+search.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    if (prefs['clean-on-esc'] === false) {
+      if (prefs['close-on-esc']) {
+        window.close();
+      }
+    }
+    else {
+      search.value = '';
+      search.dispatchEvent(new Event('search'));
+      search.dispatchEvent(new Event('input'));
+    }
+  }
+});

@@ -12,18 +12,37 @@
   };
 
   const instance = new Mark(document.body);
-  const cache = {
-    0: [],
-    1: [],
-    2: [],
-    3: [],
-    4: []
-  };
+  const cache = window.cache || {0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: []};
+  // persist for next use
+  window.cache = cache;
+  // reactivate last highlights
+  [...document.querySelectorAll('mark[data-markjs="true"][data-active="false"]')].forEach(e => {
+    e.dataset.active = true;
+  });
+
   const connect = port => {
+    let persistent = false;
     port.onDisconnect.addListener(() => {
-      // instance.unmark();
-      port.disconnect();
-      chrome.runtime.onConnect.removeListener(connect);
+      chrome.storage.local.get({
+        'persistent': false
+      }, prefs => {
+        if (persistent === false && prefs.persistent === false) {
+          instance.unmark();
+          delete window.cache;
+          delete window.query;
+          delete window.offset;
+          delete window.total;
+        }
+        else {
+          // remove highlighted
+          [...document.querySelectorAll('mark[data-markjs="true"][data-active="true"]')].forEach(e => {
+            e.dataset.active = false;
+          });
+          window.cache = cache;
+        }
+        port.disconnect();
+        chrome.runtime.onConnect.removeListener(connect);
+      });
     });
     port.onMessage.addListener(async request => {
       if (request.method === 'reset') {
@@ -35,6 +54,8 @@
       //
       if (request.method === 'search' || request.method === 'reset') {
         const {query, separator, prefs} = request;
+        // persist for next use
+        window.query = query;
         let keywords;
         if (separator === 'false') {
           keywords = [query];
@@ -98,6 +119,10 @@
             if (inViewport(mark)) {
               mark.dataset.active = true;
               mark.focus();
+
+              // persist for next use
+              window.total = marks.length;
+              window.offset = marks.indexOf(mark);
               port.postMessage({
                 method: 'stat',
                 total: marks.length,
@@ -110,6 +135,10 @@
             marks[0].dataset.active = true;
             marks[0].scrollIntoView(prefs['scroll-into-view']);
             marks[0].focus();
+
+            // persist for next use
+            window.total = marks.length;
+            window.offset = 0;
             port.postMessage({
               method: 'stat',
               total: marks.length,
@@ -118,6 +147,9 @@
           }
         }
         else {
+          // persist for next use
+          window.total = 0;
+          window.offset = 0;
           port.postMessage({
             method: 'stat',
             total: 0,
@@ -147,7 +179,17 @@
           console.error('active index is -1', active);
         }
       }
+      else if (request.method === 'persistent') {
+        persistent = true;
+      }
     });
   };
   chrome.runtime.onConnect.addListener(connect);
 }
+
+
+({
+  query: window.query,
+  total: window.total,
+  offset: window.offset
+}) // send the current query to the popup
