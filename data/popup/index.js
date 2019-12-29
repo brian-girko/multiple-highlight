@@ -14,7 +14,10 @@ const prefs = {
   'separator': ' ',
   'persistent': false,
   'clean-on-esc': true,
-  'close-on-esc': true
+  'close-on-esc': true,
+  'history-enabled': true,
+  'history-cache': {},
+  'history-period': 10 * 24 * 60 * 60 * 1000
 };
 
 app.storage.get(prefs).then(async ps => {
@@ -40,12 +43,9 @@ app.storage.get(prefs).then(async ps => {
     const o = (await app.tabs.inject.js({
       file: '/data/inject/control.js'
     })).filter(o => o).shift();
-    if (o) {
-      search.value = o.query || '';
-      updateStat(o);
-    }
 
     const tab = await app.tabs.current();
+    const ckey = tab.url.split('#')[0];
     const port = app.runtime.connect(tab.id, {
       name: 'highlight'
     });
@@ -65,6 +65,22 @@ app.storage.get(prefs).then(async ps => {
         });
         forward.disabled = true;
         backward.disabled = true;
+        // save to history
+        if (prefs['history-enabled']) {
+          const now = Date.now();
+          prefs['history-cache'][ckey] = {
+            query,
+            now
+          };
+          for (const [key, o] of Object.entries(prefs['history-cache'])) {
+            if (now - o.now > prefs['history-period']) {
+              delete prefs['history-cache'][key];
+            }
+          }
+          chrome.storage.local.set({
+            'history-cache': prefs['history-cache']
+          });
+        }
       }, 300, e.target.value);
     };
     search.addEventListener('input', input);
@@ -101,6 +117,18 @@ app.storage.get(prefs).then(async ps => {
       }
       window.close();
     });
+    // fill the search box
+    if (o && o.query) {
+      search.value = o.query || '';
+      updateStat(o);
+    }
+    else {
+      const v = prefs['history-cache'][ckey];
+      if (v && prefs['history-enabled']) {
+        search.value = v.query;
+        search.dispatchEvent(new Event('input'));
+      }
+    }
   }
   catch (e) {
     search.value = e.message;

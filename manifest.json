@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
-  "version": "0.1.1",
+  "version": "0.1.2",
   "name": "Multiple Highlight",
-  "description": "Highlight multiple words separated by comma, space or arbitrary separator with regular expression support",
+  "description": "Highlight multiple words separated by comma, space or arbitrary separator with persistent history",
   "permissions": [
     "storage",
     "activeTab"

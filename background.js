@@ -1,5 +1,14 @@
 'use stirct';
 
+// delete history when it is disabled
+chrome.storage.onChanged.addListener(prefs => {
+  if (prefs['history-enabled'] && prefs['history-enabled'].newValue === false) {
+    chrome.storage.local.set({
+      'history-cache': {}
+    });
+  }
+});
+
 // FAQs and Feedback
 {
   const {onInstalled, setUninstallURL, getManifest} = chrome.runtime;

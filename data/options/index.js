@@ -6,17 +6,20 @@ const toast = document.getElementById('toast');
 app.storage.get({
   'persistent': false,
   'clean-on-esc': true,
-  'close-on-esc': true
+  'close-on-esc': true,
+  'history-enabled': true
 }).then(prefs => {
   document.getElementById('persistent').checked = prefs.persistent;
   document.getElementById('clean-on-esc').checked = prefs['clean-on-esc'];
   document.getElementById('close-on-esc').checked = prefs['close-on-esc'];
+  document.getElementById('history-enabled').checked = prefs['history-enabled'];
 });
 
 document.getElementById('save').addEventListener('click', () => app.storage.set({
   'persistent': document.getElementById('persistent').checked,
   'clean-on-esc': document.getElementById('clean-on-esc').checked,
-  'close-on-esc': document.getElementById('close-on-esc').checked
+  'close-on-esc': document.getElementById('close-on-esc').checked,
+  'history-enabled': document.getElementById('history-enabled').checked
 }).then(() => {
   toast.textContent = 'Options saved';
   window.setTimeout(() => toast.textContent = '', 750);

@@ -4,6 +4,11 @@
   <title>Options :: Multiple Highlight</title>
 </head>
 <body>
+  <style type="text/css">
+    td:first-child {
+      vertical-align: top;
+    }
+  </style>
   <table width="100%">
     <colgroup>
       <col width="32">
@@ -21,6 +26,10 @@
       <tr>
         <td><input type="checkbox" id="clean-on-esc"></td>
         <td><label for="clean-on-esc"> Clean the search box when ESC is pressed<sup>2</sup></label></td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" id="history-enabled"></td>
+        <td><label for="history-enabled"> Save the query for the current URL and automatically perform the search when the popup is opened on the same URL</label></td>
       </tr>
     </tbody>
   </table>
