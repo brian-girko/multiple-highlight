@@ -53,10 +53,13 @@ select {
   margin-right: 5px;
 }
 #search {
-  width: 250px;
+  width: 350px;
   background-color: transparent;
   border: none;
   padding: 15px;
+}
+#search[data-clean="false"] {
+  color: #ec3a3a;
 }
 #stat {
   padding-right: 10px;

@@ -53,6 +53,10 @@ app.storage.get(prefs).then(async ps => {
       if (request.method === 'stat') {
         updateStat(request);
       }
+      else if (request.method === 'clean') {
+        search.dataset.clean = request.clean === '';
+        search.title = request.clean;
+      }
     });
     const input = e => {
       window.clearTimeout(input.id);

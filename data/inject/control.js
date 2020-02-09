@@ -88,6 +88,7 @@
         }
         keywords = keywords.filter(k => oKeywords.indexOf(k) === -1);
         // apply new keywords
+        let clean = '';
         for (const keyword of keywords) {
           const i = Object.keys(cache)
             .sort((a, b) => cache[a].filter(a => a).length - cache[b].filter(b => b).length).shift();
@@ -99,14 +100,37 @@
             cache[i][j] = keyword;
           }
           // console.log('using', i, 'for', keyword, 'mark' + i + j);
-          await new Promise(resolve => instance.mark(keyword, {
-            className: 'mark' + i + j,
-            separateWordSearch: false,
-            done() {
-              resolve();
+          await new Promise(resolve => {
+            const options = {
+              className: 'mark' + i + j,
+              separateWordSearch: false,
+              done() {
+                resolve();
+              }
+            };
+            if (keyword.startsWith('r:')) {
+              try {
+                const w = keyword.substr(2);
+                if (w.length >= 2) {
+                  const re = new RegExp(w, 'i');
+                  instance.markRegExp(re, options);
+                }
+              }
+              catch (e) {
+                console.warn('regexp evaluation error', e);
+                clean = e.message;
+                resolve();
+              }
             }
-          }));
+            else {
+              instance.mark(keyword, options);
+            }
+          });
         }
+        port.postMessage({
+          method: 'clean',
+          clean
+        });
         //
         const marks = [...document.querySelectorAll('mark[data-markjs="true"]')];
         // remove old actives
