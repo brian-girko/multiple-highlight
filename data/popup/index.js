@@ -191,6 +191,28 @@ app.storage.get(prefs).then(async ps => {
       }
       window.close();
     });
+    // prevent ESC from cleaning the search box
+    search.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (prefs['clean-on-esc'] === false) {
+          if (prefs['close-on-esc']) {
+            window.close();
+          }
+        }
+        else {
+          if (e.shiftKey) {
+            port.post({
+              method: 'persistent'
+            });
+            window.close();
+          }
+          search.value = '';
+          search.dispatchEvent(new Event('search'));
+          search.dispatchEvent(new Event('input'));
+        }
+      }
+    });
     // fill the search box
     if (o && o.query) {
       search.value = o.query || '';
@@ -213,7 +235,9 @@ app.storage.get(prefs).then(async ps => {
 // close on ESC
 search.addEventListener('search', e => {
   if (search.esc && e.target.value === '') {
-    window.close();
+    if (e.isTrusted === false) {
+      window.close();
+    }
   }
   search.esc = e.target.value ? false : true;
 });
@@ -231,19 +255,3 @@ document.addEventListener('DOMContentLoaded', () => {
   window.setTimeout(() => search.focus(), 0);
 });
 
-// prevent ESC from cleaning the search box
-search.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    e.preventDefault();
-    if (prefs['clean-on-esc'] === false) {
-      if (prefs['close-on-esc']) {
-        window.close();
-      }
-    }
-    else {
-      search.value = '';
-      search.dispatchEvent(new Event('search'));
-      search.dispatchEvent(new Event('input'));
-    }
-  }
-});

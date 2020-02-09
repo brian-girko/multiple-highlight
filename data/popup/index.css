@@ -1,6 +1,7 @@
 body {
   margin: 0;
-  color: #6e6e6e;
+  color: #8e8e8e;
+  width: 500px;
 }
 body,
 input {
@@ -10,6 +11,18 @@ input {
 select,
 input {
   outline: none;
+}
+select {
+  border: none;
+  background: transparent;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 5px;
+  margin: 5px;
+  cursor: pointer;
+  border-radius: 0;
+  color: #6e6e6e;
+  text-align-last: center;
 }
 input[type=button] {
   border: none;
@@ -22,20 +35,10 @@ input[type=button]:disabled {
   opacity: 0.5;
 }
 select:hover,
-input[type=button]:hover {
+input[type=button]:not(:disabled):hover {
   background-color: rgba(0, 0, 0, 0.05) !important;
 }
-select {
-  border: none;
-  background: transparent;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  padding: 5px;
-  margin: 5px;
-  cursor: pointer;
-  border-radius: 0;
-  color: #6e6e6e;
-}
+
 #form {
   display: flex;
   align-items: center;
@@ -53,10 +56,10 @@ select {
   margin-right: 5px;
 }
 #search {
-  width: 350px;
   background-color: transparent;
   border: none;
-  padding: 15px;
+  padding: 0 10px;
+  flex: 1;
 }
 #search[data-clean="false"] {
   color: #ec3a3a;
@@ -65,7 +68,7 @@ select {
   padding-right: 10px;
 }
 .sep {
-  border-right: solid 1px #dcdcdc;
+  border-right: dotted 1px #dcdcdc;
   height: 20px;
   width: 1px;
 }

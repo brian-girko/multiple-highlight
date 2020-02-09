@@ -9,7 +9,12 @@
     <input type="search" id="search" autofocus placeholder="Search the document. Use r: for regexp">
     <span id="stat">0/0</span>
     <span class="sep"></span>
-    <select id="separator" title="Use this character to split the query into sub-queries">
+    <select id="separator" title="Split the query into sub-queries:
+
+[ ]: Use space as the separator
+[,]: Use comma as the separator
+[;]: Use semicolon as the separator
+[n]: Do not use any separator">
       <option value=" ">[ ]</option>
       <option value=",">[,]</option>
       <option value=";">[;]</option>
@@ -19,7 +24,8 @@
     <input type="button" id="backward" title="Press [Shift + Enter]" disabled="true">
     <input type="button" id="forward" title="Press [Enter]" disabled="true">
     <input type="button" id="close" title="Press [ESC] to close
-Press Shift key while clicking on this button to close without removing highlights">
+Press [Shift] + [ESC] to close without removing highlights
+Press [Shift] key while clicking on this button to close without removing highlights">
   </div id="form">
   <script type="text/javascript" src="/app.js/base.js"></script>
   <script type="text/javascript" src="index.js"></script>
