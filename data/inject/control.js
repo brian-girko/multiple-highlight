@@ -90,6 +90,13 @@
         // apply new keywords
         let clean = '';
         for (const keyword of keywords) {
+          const command = keyword.indexOf(':') === -1 ? '' : keyword.split(':')[0].toLowerCase();
+          const pk = command ? keyword.substr(command.length + 1) : keyword;
+          const underline = command && command.indexOf('u') !== -1;
+          const bold = command && command.indexOf('b') !== -1;
+          const highlight = (underline || bold) ? command.indexOf('h') !== -1 : true;
+          console.log(command, pk);
+
           const i = Object.keys(cache)
             .sort((a, b) => cache[a].filter(a => a).length - cache[b].filter(b => b).length).shift();
           let j = cache[i].indexOf('');
@@ -106,13 +113,17 @@
               separateWordSearch: false,
               done() {
                 resolve();
+              },
+              each(mark) {
+                mark.dataset.underline = underline;
+                mark.dataset.bold = bold;
+                mark.dataset.highlight = highlight;
               }
             };
-            if (keyword.startsWith('r:')) {
+            if (command && command.indexOf('r') !== -1) {
               try {
-                const w = keyword.substr(2);
-                if (w.length >= 2) {
-                  const re = new RegExp(w, 'i');
+                if (pk.length >= 2) {
+                  const re = new RegExp(pk, 'i');
                   instance.markRegExp(re, options);
                 }
               }
@@ -123,7 +134,7 @@
               }
             }
             else {
-              instance.mark(keyword, options);
+              instance.mark(pk, options);
             }
           });
         }

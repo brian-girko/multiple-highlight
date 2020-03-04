@@ -1,7 +1,7 @@
 body {
   margin: 0;
   color: #8e8e8e;
-  width: 500px;
+  width: 550px;
 }
 body,
 input {
@@ -42,6 +42,7 @@ input[type=button]:not(:disabled):hover {
 #form {
   display: flex;
   align-items: center;
+  min-height: 40px;
 }
 #backward {
   background: url('up.svg') no-repeat center center;

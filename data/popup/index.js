@@ -37,72 +37,92 @@ app.storage.get(prefs).then(async ps => {
   Object.assign(prefs, ps);
 
   separator.value = prefs.separator;
+
+  const once = (await app.tabs.inject.js({
+    code: 'typeof Mark'
+  })).filter(o => o).shift() === 'undefined';
+  console.log(once);
+
   try {
-    await Promise.all([
+    // only inject once
+    once ? await Promise.all([
       app.tabs.inject.js({
         file: '/data/inject/mark.es6.js'
       }),
       app.tabs.inject.css({
         code: `
+          mark[data-markjs="true"] {
+            color: var(--map-one);
+            background: transparent;
+          }
+          mark[data-markjs="true"][data-underline="true"] {
+            text-decoration: underline;
+          }
+          mark[data-markjs="true"][data-bold="true"] {
+            font-weight: bold;
+          }
+          mark[data-markjs="true"][data-highlight="true"] {
+            background: var(--map-two);
+            box-shadow: 0 0 0 2px var(--map-three);
+          }
           .mark00, .mark01, .mark02, .mark03, .mark04, .mark05, .mark06, .mark07, .mark08, .mark09 {
-            color: ${prefs.colors.a[0]};
-            background: ${prefs.colors.a[1]};
-            box-shadow: 0 0 0 2px ${prefs.colors.a[2]};
+            --map-one: ${prefs.colors.a[0]};
+            --map-two: ${prefs.colors.a[1]};
+            --map-three: ${prefs.colors.a[2]};
           }
           .mark10, .mark11, .mark12, .mark13, .mark14, .mark15, .mark16, .mark17, .mark18, .mark19 {
-            color: ${prefs.colors.b[0]};
-            background: ${prefs.colors.b[1]};
-            box-shadow: 0 0 0 2px ${prefs.colors.b[2]};
+            --map-one: ${prefs.colors.b[0]};
+            --map-two: ${prefs.colors.b[1]};
+            --map-three: ${prefs.colors.b[2]};
           }
           .mark20, .mark21, .mark22, .mark23, .mark24, .mark25, .mark26, .mark27, .mark28, .mark29 {
-            color: ${prefs.colors.c[0]};
-            background: ${prefs.colors.c[1]};
-            box-shadow: 0 0 0 2px ${prefs.colors.c[2]};
+            --map-one: ${prefs.colors.c[0]};
+            --map-two: ${prefs.colors.c[1]};
+            --map-three: ${prefs.colors.c[2]};
           }
           .mark30, .mark31, .mark32, .mark33, .mark34, .mark35, .mark36, .mark37, .mark38, .mark39 {
-            color: ${prefs.colors.d[0]};
-            background: ${prefs.colors.d[1]};
-            box-shadow: 0 0 0 2px ${prefs.colors.d[2]};
+            --map-one: ${prefs.colors.d[0]};
+            --map-two: ${prefs.colors.d[1]};
+            --map-three: ${prefs.colors.d[2]};
           }
           .mark40, .mark41, .mark42, .mark43, .mark44, .mark45, .mark46, .mark47, .mark48, .mark49 {
-            color: ${prefs.colors.e[0]};
-            background: ${prefs.colors.e[1]};
-            box-shadow: 0 0 0 2px ${prefs.colors.e[2]};
+            --map-one: ${prefs.colors.e[0]};
+            --map-two: ${prefs.colors.e[1]};
+            --map-three: ${prefs.colors.e[2]};
           }
           .mark50, .mark51, .mark52, .mark53, .mark54, .mark55, .mark56, .mark57, .mark58, .mark59 {
-            color: ${prefs.colors.f[0]};
-            background: ${prefs.colors.f[1]};
-            box-shadow: 0 0 0 2px ${prefs.colors.f[2]};
+            --map-one: ${prefs.colors.f[0]};
+            --map-two: ${prefs.colors.f[1]};
+            --map-three: ${prefs.colors.f[2]};
           }
           .mark60, .mark61, .mark62, .mark63, .mark64, .mark65, .mark66, .mark67, .mark68, .mark69 {
-            color: ${prefs.colors.g[0]};
-            background: ${prefs.colors.g[1]};
-            box-shadow: 0 0 0 2px ${prefs.colors.g[2]};
+            --map-one: ${prefs.colors.g[0]};
+            --map-two: ${prefs.colors.g[1]};
+            --map-three: ${prefs.colors.g[2]};
           }
           .mark70, .mark71, .mark72, .mark73, .mark74, .mark75, .mark76, .mark77, .mark78, .mark79 {
-            color: ${prefs.colors.h[0]};
-            background: ${prefs.colors.h[1]};
-            box-shadow: 0 0 0 2px ${prefs.colors.h[2]};
+            --map-one: ${prefs.colors.h[0]};
+            --map-two: ${prefs.colors.h[1]};
+            --map-three: ${prefs.colors.h[2]};
           }
           .mark80, .mark81, .mark82, .mark83, .mark84, .mark85, .mark86, .mark87, .mark88, .mark89 {
-            color: ${prefs.colors.i[0]};
-            background: ${prefs.colors.i[1]};
-            box-shadow: 0 0 0 2px ${prefs.colors.i[2]};
+            --map-one: ${prefs.colors.i[0]};
+            --map-two: ${prefs.colors.i[1]};
+            --map-three: ${prefs.colors.i[2]};
           }
           .mark90, .mark91, .mark92, .mark93, .mark94, .mark95, .mark96, .mark97, .mark98, .mark99 {
-            color: ${prefs.colors.j[0]};
-            background: ${prefs.colors.j[1]};
-            box-shadow: 0 0 0 2px ${prefs.colors.j[2]};
+            --map-one: ${prefs.colors.j[0]};
+            --map-two: ${prefs.colors.j[1]};
+            --map-three: ${prefs.colors.j[2]};
           }
-
           mark[data-markjs="true"][data-active="true"] {
-            color: ${prefs.colors._[0]};
-            background-color: ${prefs.colors._[1]};
-            box-shadow: 0 0 0 2px ${prefs.colors._[2]};
+            --map-one: ${prefs.colors._[0]};
+            --map-two: ${prefs.colors._[1]};
+            --map-three: ${prefs.colors._[2]};
           }
         `
       })
-    ]);
+    ]) : '';
 
     const updateStat = request => {
       stat.total = 'total' in request ? request.total : stat.total;
