@@ -44,7 +44,7 @@ datalist.activate = () => {
     const {hostname} = new URL(tab.url);
     datalist.hostname = hostname;
 
-    const key = datalist.hostname + '-' + 'datalist';
+    const key = datalist.hostname + '-datalist';
     chrome.storage.local.get({
       [key]: []
     }, prefs => {
@@ -201,7 +201,7 @@ app.storage.get(prefs).then(async ps => {
     }
   }
   catch (e) {
-    search.value = e.message;
+    search.value = 'Disabled on This Page; ' + e.message;
     search.disabled = true;
   }
 });

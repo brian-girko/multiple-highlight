@@ -55,6 +55,12 @@ document.getElementById('save').addEventListener('click', () => app.storage.set(
     return p;
   }, {})
 }).then(() => {
+  if (document.getElementById('datalist-enabled').checked === false) {
+    chrome.storage.local.get(null, prefs => {
+      const keys = Object.keys(prefs).filter(s => s.endsWith('-datalist'));
+      chrome.storage.local.remove(keys);
+    });
+  }
   toast.textContent = 'Options saved';
   window.setTimeout(() => toast.textContent = '', 750);
 }));
