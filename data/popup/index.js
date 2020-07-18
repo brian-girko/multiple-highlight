@@ -174,7 +174,12 @@ app.storage.get(prefs).then(async ps => {
 
     const updateStat = request => {
       stat.total = 'total' in request ? request.total : stat.total;
-      stat.textContent = (request.offset || 0) + '/' + (stat.total || 0);
+      if (stat.total) {
+        stat.textContent = ((request.offset || 0) + 1) + '/' + stat.total;
+      }
+      else {
+        stat.textContent = '0/0';
+      }
       backward.disabled = forward.disabled = [0, 1].indexOf(request.total) !== -1;
     };
 
