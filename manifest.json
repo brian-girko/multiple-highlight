@@ -32,6 +32,9 @@
   },
   "commands": {
     "_execute_browser_action": {},
+    "remove_highlight": {
+      "description": "Remove all highlights"
+    },
     "ckey_highlight": {
       "description": "Highlight the last searched query without opening the extension's interface"
     }

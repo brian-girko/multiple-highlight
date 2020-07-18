@@ -44,6 +44,24 @@ chrome.commands.onCommand.addListener(command => {
       }
     });
   }
+  else if (command === 'remove_highlight') {
+    chrome.storage.local.get(utils.prefs, prefs => {
+      utils.inject(prefs.colors).then(() => {
+        app.tabs.inject.js({
+          file: '/data/inject/mark.es6.js'
+        }).then(() => app.tabs.inject.js({
+          code: `{
+            const instance = new Mark(document.body);
+            delete window.cache;
+            delete window.query;
+            delete window.offset;
+            delete window.total;
+            instance.unmark();
+          }`
+        }));
+      });
+    });
+  }
 });
 
 /* FAQs & Feedback */
