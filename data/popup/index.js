@@ -119,6 +119,8 @@ app.storage.get(prefs).then(async ps => {
             --map-one: ${prefs.colors._[0]};
             --map-two: ${prefs.colors._[1]};
             --map-three: ${prefs.colors._[2]};
+            background: var(--map-two);
+            box-shadow: 0 0 0 2px var(--map-three);
           }
         `
       })
