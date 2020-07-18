@@ -12,6 +12,7 @@
     "persistent": false,
     "scripts": [
       "app.js/base.js",
+      "data/popup/utils.js",
       "background.js"
     ]
   },
@@ -30,7 +31,10 @@
     "16": "data/icons/16.png"
   },
   "commands": {
-    "_execute_browser_action": {}
+    "_execute_browser_action": {},
+    "ckey_highlight": {
+      "description": "Highlight the last searched query without opening the extension's interface"
+    }
   },
   "options_ui": {
     "page": "data/options/index.html",

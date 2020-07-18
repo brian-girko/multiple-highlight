@@ -20,9 +20,10 @@
     e.dataset.active = true;
   });
 
+
   const connect = port => {
     let persistent = false;
-    port.onDisconnect.addListener(() => {
+    const disconnect = () => {
       chrome.storage.local.get({
         'persistent': false
       }, prefs => {
@@ -43,7 +44,8 @@
         port.disconnect();
         chrome.runtime.onConnect.removeListener(connect);
       });
-    });
+    };
+    port.onDisconnect.addListener(disconnect);
     port.onMessage.addListener(async request => {
       if (request.method === 'reset') {
         instance.unmark();
@@ -69,7 +71,6 @@
         for (const i of Object.keys(cache)) {
           cache[i].forEach((keyword, j) => {
             if (keyword && keywords.indexOf(keyword) === -1) {
-              // console.log('removing', keyword);
               instance.unmark({
                 className: 'mark' + i + j
               });
@@ -95,7 +96,6 @@
           const underline = command && command.indexOf('u') !== -1;
           const bold = command && command.indexOf('b') !== -1;
           const highlight = (underline || bold) ? command.indexOf('h') !== -1 : true;
-          console.log(command, pk);
 
           const i = Object.keys(cache)
             .sort((a, b) => cache[a].filter(a => a).length - cache[b].filter(b => b).length).shift();
@@ -106,7 +106,6 @@
           else {
             cache[i][j] = keyword;
           }
-          // console.log('using', i, 'for', keyword, 'mark' + i + j);
           await new Promise(resolve => {
             const options = {
               className: 'mark' + i + j,
@@ -190,6 +189,11 @@
             total: 0,
             offset: 0
           });
+        }
+        if (request.origin === 'background') {
+          persistent = true;
+          disconnect();
+          port.disconnect();
         }
       }
       else if (request.method === 'navigate') {

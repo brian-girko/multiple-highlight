@@ -9,6 +9,7 @@ const prefs = {
   'close-on-esc': true,
   'datalist-enabled': true,
   'history-enabled': true,
+  'history-mode': 'url',
   'colors': {
     'a': ['#666666', '#ffff00', '#ffff00'],
     'b': ['#666666', '#ffc501', '#ffc501'],
@@ -30,6 +31,7 @@ app.storage.get(prefs).then(prefs => {
   document.getElementById('close-on-esc').checked = prefs['close-on-esc'];
   document.getElementById('datalist-enabled').checked = prefs['datalist-enabled'];
   document.getElementById('history-enabled').checked = prefs['history-enabled'];
+  document.getElementById('history-mode').value = prefs['history-mode'];
   for (const [key, [c, b, s]] of Object.entries(prefs.colors)) {
     document.querySelector(`#${key} td:nth-child(2) input`).value = c;
     document.querySelector(`#${key} td:nth-child(3) input`).value = b;
@@ -43,6 +45,7 @@ document.getElementById('save').addEventListener('click', () => app.storage.set(
   'close-on-esc': document.getElementById('close-on-esc').checked,
   'datalist-enabled': document.getElementById('datalist-enabled').checked,
   'history-enabled': document.getElementById('history-enabled').checked,
+  'history-mode': document.getElementById('history-mode').value,
   'colors': Object.keys(prefs.colors).reduce((p, key) => {
     p[key] = [
       document.querySelector(`#${key} td:nth-child(2) input`).value,

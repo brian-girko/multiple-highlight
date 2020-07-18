@@ -33,7 +33,11 @@
       </tr>
       <tr>
         <td><input type="checkbox" id="history-enabled"></td>
-        <td><label for="history-enabled"> Save the query for the current URL and automatically perform the search when the popup is opened on the same URL</label></td>
+        <td><label for="history-enabled"> Save the query for <select id="history-mode">
+          <option value="url">the current URL</option>
+          <option value="hostname">the current hostname</option>
+          <option value="global">any website</option>
+        </select> and automatically perform the search when the popup is opened</label></td>
       </tr>
       <tr>
         <td><input type="checkbox" id="datalist-enabled"></td>
