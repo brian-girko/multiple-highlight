@@ -5,6 +5,8 @@ const stat = document.getElementById('stat');
 const forward = document.getElementById('forward');
 const backward = document.getElementById('backward');
 
+let tab;
+
 const prefs = {
   'min-length': 2,
   'scroll-into-view': {
@@ -15,6 +17,7 @@ const prefs = {
   'persistent': false,
   'clean-on-esc': true,
   'close-on-esc': true,
+  'datalist-enabled': true,
   'history-enabled': true,
   'history-cache': {},
   'history-period': 10 * 24 * 60 * 60 * 1000,
@@ -32,6 +35,50 @@ const prefs = {
     '_': ['#303b49', '#abd1ff', '#96bbe8']
   }
 };
+const datalist = () => {
+  if (search.value && tab && tab.url && (tab.url.startsWith('http') || tab.url.startsWith('file'))) {
+    datalist.cache.unshift(search.value);
+    datalist.cache = datalist.cache.filter((s, i, l) => l.indexOf(s) === i);
+    datalist.cache = datalist.cache.slice(0, 8);
+
+    datalist.update();
+
+    chrome.storage.local.set({
+      [datalist.hostname + '-' + 'datalist']: datalist.cache
+    });
+  }
+};
+datalist.cache = [];
+datalist.available = false;
+datalist.update = () => {
+  for (let i = 0; i < 8; i += 1) {
+    const e = document.querySelector(`#datalist option:nth-child(${i + 1})`);
+    if (datalist.cache[i]) {
+      e.value = datalist.cache[i];
+      e.disabled = false;
+    }
+    else {
+      e.disabled = true;
+    }
+  }
+};
+datalist.activate = () => {
+  datalist.available = prefs['datalist-enabled'] && tab && tab.url &&
+    (tab.url.startsWith('http') || tab.url.startsWith('file'));
+
+  if (datalist.available) {
+    const {hostname} = new URL(tab.url);
+    datalist.hostname = hostname;
+
+    const key = datalist.hostname + '-' + 'datalist';
+    chrome.storage.local.get({
+      [key]: []
+    }, prefs => {
+      datalist.cache = prefs[key];
+      datalist.update();
+    });
+  }
+};
 
 app.storage.get(prefs).then(async ps => {
   Object.assign(prefs, ps);
@@ -41,7 +88,6 @@ app.storage.get(prefs).then(async ps => {
   const once = (await app.tabs.inject.js({
     code: 'typeof Mark'
   })).filter(o => o).shift() === 'undefined';
-  console.log(once);
 
   try {
     // only inject once
@@ -136,7 +182,9 @@ app.storage.get(prefs).then(async ps => {
       file: '/data/inject/control.js'
     })).filter(o => o).shift();
 
-    const tab = await app.tabs.current();
+    tab = await app.tabs.current();
+    datalist.activate();
+
     const ckey = tab.url.split('#')[0];
     const port = app.runtime.connect(tab.id, {
       name: 'highlight'
@@ -195,16 +243,22 @@ app.storage.get(prefs).then(async ps => {
       separator: separator.value,
       prefs
     }));
-    backward.addEventListener('click', () => port.post({
-      method: 'navigate',
-      type: 'backward',
-      prefs
-    }));
-    forward.addEventListener('click', () => port.post({
-      method: 'navigate',
-      type: 'forward',
-      prefs
-    }));
+    backward.addEventListener('click', () => {
+      datalist();
+      port.post({
+        method: 'navigate',
+        type: 'backward',
+        prefs
+      });
+    });
+    forward.addEventListener('click', () => {
+      datalist();
+      port.post({
+        method: 'navigate',
+        type: 'forward',
+        prefs
+      });
+    });
     document.getElementById('close').addEventListener('click', e => {
       if (e.shiftKey) {
         port.post({

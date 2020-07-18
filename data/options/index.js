@@ -7,6 +7,7 @@ const prefs = {
   'persistent': false,
   'clean-on-esc': true,
   'close-on-esc': true,
+  'datalist-enabled': true,
   'history-enabled': true,
   'colors': {
     'a': ['#666666', '#ffff00', '#ffff00'],
@@ -27,6 +28,7 @@ app.storage.get(prefs).then(prefs => {
   document.getElementById('persistent').checked = prefs.persistent;
   document.getElementById('clean-on-esc').checked = prefs['clean-on-esc'];
   document.getElementById('close-on-esc').checked = prefs['close-on-esc'];
+  document.getElementById('datalist-enabled').checked = prefs['datalist-enabled'];
   document.getElementById('history-enabled').checked = prefs['history-enabled'];
   for (const [key, [c, b, s]] of Object.entries(prefs.colors)) {
     document.querySelector(`#${key} td:nth-child(2) input`).value = c;
@@ -39,6 +41,7 @@ document.getElementById('save').addEventListener('click', () => app.storage.set(
   'persistent': document.getElementById('persistent').checked,
   'clean-on-esc': document.getElementById('clean-on-esc').checked,
   'close-on-esc': document.getElementById('close-on-esc').checked,
+  'datalist-enabled': document.getElementById('datalist-enabled').checked,
   'history-enabled': document.getElementById('history-enabled').checked,
   'colors': Object.keys(prefs.colors).reduce((p, key) => {
     p[key] = [
