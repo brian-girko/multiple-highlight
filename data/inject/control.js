@@ -110,6 +110,9 @@
             const options = {
               className: 'mark' + i + j,
               separateWordSearch: false,
+              synonyms: {
+                '`': `'`
+              },
               done() {
                 resolve();
               },

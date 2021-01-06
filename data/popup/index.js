@@ -55,13 +55,13 @@ datalist.activate = () => {
 };
 
 app.storage.get(prefs).then(async ps => {
-  Object.assign(prefs, ps);
+  Object.assign(utils.prefs, ps);
 
   separator.value = prefs.separator;
 
   try {
     // only inject once
-    await utils.inject(prefs.colors);
+    await utils.inject();
 
     const updateStat = request => {
       stat.total = 'total' in request ? request.total : stat.total;

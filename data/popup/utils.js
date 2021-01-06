@@ -5,8 +5,8 @@ const utils = {
   prefs: {
     'min-length': 2,
     'scroll-into-view': {
-      behavior: 'auto',
-      block: 'center'
+      'behavior': 'auto',
+      'block': 'center'
     },
     'persistent': false,
     'clean-on-esc': true,
@@ -17,6 +17,7 @@ const utils = {
     'history-cache': {},
     'history-period': 10 * 24 * 60 * 60 * 1000,
     'history-mode': 'url', // url, hostname, global
+    'shadow-size': 0,
     'colors': {
       'a': ['#666666', '#ffff00', '#ffff00'],
       'b': ['#666666', '#ffc501', '#ffc501'],
@@ -36,7 +37,8 @@ const utils = {
       code: 'typeof Mark'
     })).filter(o => o).shift() === 'undefined';
   },
-  async prepare(colors) {
+  async prepare() {
+    const {colors} = utils.prefs;
     await Promise.all([
       app.tabs.inject.js({
         file: '/data/inject/mark.es6.js'
@@ -55,7 +57,7 @@ const utils = {
           }
           mark[data-markjs="true"][data-highlight="true"] {
             background: var(--map-two);
-            box-shadow: 0 0 0 2px var(--map-three);
+            box-shadow: 0 0 0 ${utils.prefs['shadow-size']}px var(--map-three);
           }
           .mark00, .mark01, .mark02, .mark03, .mark04, .mark05, .mark06, .mark07, .mark08, .mark09 {
             --map-one: ${colors.a[0]};
@@ -112,7 +114,7 @@ const utils = {
             --map-two: ${colors._[1]};
             --map-three: ${colors._[2]};
             background: var(--map-two);
-            box-shadow: 0 0 0 2px var(--map-three);
+            box-shadow: 0 0 0 ${utils.prefs['shadow-size']} var(--map-three);
           }
         `
       })
