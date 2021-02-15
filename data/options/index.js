@@ -10,6 +10,7 @@ const prefs = {
   'datalist-enabled': true,
   'history-enabled': true,
   'history-mode': 'url',
+  'no-active-rule': false,
   'colors': {
     'a': ['#666666', '#ffff00', '#ffff00'],
     'b': ['#666666', '#ffc501', '#ffc501'],
@@ -22,7 +23,8 @@ const prefs = {
     'i': ['#5d0100', '#b8dbec', '#b8dbec'],
     'j': ['#ffeef7', '#34222c', '#34222c'],
     '_': ['#303b49', '#abd1ff', '#96bbe8']
-  }
+  },
+  'custom-css': ''
 };
 
 app.storage.get(prefs).then(prefs => {
@@ -32,11 +34,13 @@ app.storage.get(prefs).then(prefs => {
   document.getElementById('datalist-enabled').checked = prefs['datalist-enabled'];
   document.getElementById('history-enabled').checked = prefs['history-enabled'];
   document.getElementById('history-mode').value = prefs['history-mode'];
+  document.getElementById('no-active-rule').checked = prefs['no-active-rule'];
   for (const [key, [c, b, s]] of Object.entries(prefs.colors)) {
     document.querySelector(`#${key} td:nth-child(2) input`).value = c;
     document.querySelector(`#${key} td:nth-child(3) input`).value = b;
     document.querySelector(`#${key} td:nth-child(4) input`).value = s;
   }
+  document.getElementById('custom-css').value = prefs['custom-css'];
 });
 
 document.getElementById('save').addEventListener('click', () => app.storage.set({
@@ -46,6 +50,7 @@ document.getElementById('save').addEventListener('click', () => app.storage.set(
   'datalist-enabled': document.getElementById('datalist-enabled').checked,
   'history-enabled': document.getElementById('history-enabled').checked,
   'history-mode': document.getElementById('history-mode').value,
+  'no-active-rule': document.getElementById('no-active-rule').checked,
   'colors': Object.keys(prefs.colors).reduce((p, key) => {
     p[key] = [
       document.querySelector(`#${key} td:nth-child(2) input`).value,
@@ -53,7 +58,8 @@ document.getElementById('save').addEventListener('click', () => app.storage.set(
       document.querySelector(`#${key} td:nth-child(4) input`).value
     ];
     return p;
-  }, {})
+  }, {}),
+  'custom-css': document.getElementById('custom-css').value
 }).then(() => {
   if (document.getElementById('datalist-enabled').checked === false) {
     chrome.storage.local.get(null, prefs => {

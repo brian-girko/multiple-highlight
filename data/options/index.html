@@ -6,10 +6,21 @@
 </head>
 <body>
   <style type="text/css">
+    body {
+      background-color: #fff;
+      font-family: "Helvetica Neue", Helvetica, sans-serif;
+      font-size: 13px;
+      max-width: 80%;
+      margin: auto;
+    }
+    @media screen and (max-width: 600px)  {
+      body {
+        margin: 10px;
+        max-width: unset;
+      }
+    }
     @supports (-moz-appearance:none) {
       body {
-        font-size: 13px;
-        font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
         margin: 15px;
       }
       button,
@@ -37,6 +48,11 @@
     }
     .colors td:not(:first-child) {
       text-align: center;
+    }
+    textarea {
+      margin-top: 10px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
   </style>
@@ -69,6 +85,10 @@
       <tr>
         <td><input type="checkbox" id="datalist-enabled"></td>
         <td><label for="datalist-enabled"> If navigation is pressed, save the query for the current hostname (e.g.: www.google.com) and offer an autocompleting list of the previous queries for the same hostname</label></td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" id="no-active-rule"></td>
+        <td><label for="no-active-rule"> Do not style active mark (I'll do my own in the custom style section) (page refresh required)</label></td>
       </tr>
     </tbody>
   </table>
@@ -152,6 +172,7 @@
       <td><input type="color"></td>
     </tr>
   </table>
+  <textarea id="custom-css" rows=6 placeholder="Custom styles to overwrite default ones. To match active marker use 'mark[data-markjs=&quot;true&quot;][data-active=&quot;true&quot;]' and to match the first marker use '.mark00'"></textarea>
 
   <div id="explore"></div>
 
