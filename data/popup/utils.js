@@ -117,7 +117,6 @@ const utils = {
       }`;
     }
     code += utils.prefs['custom-css'];
-    console.log('engine', utils.prefs.engine);
     await Promise.all([
       app.tabs.inject.js({
         file: '/data/inject/' + utils.prefs.engine

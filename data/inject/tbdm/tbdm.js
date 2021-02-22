@@ -242,7 +242,6 @@ export default class TBDM extends CONFIG {
     }
   }
   destroy() {
-    console.log('destroy is called');
     this.break = true;
     delete this.contents;
     delete this.offsets;
