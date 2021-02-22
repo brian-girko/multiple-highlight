@@ -3,6 +3,7 @@
 
 const utils = {
   prefs: {
+    'engine': 'mark.es6.js', // 'tbdm.es6.js', 'mark.es6.js'
     'min-length': 2,
     'scroll-into-view': {
       'behavior': 'auto',
@@ -116,9 +117,10 @@ const utils = {
       }`;
     }
     code += utils.prefs['custom-css'];
+    console.log('engine', utils.prefs.engine);
     await Promise.all([
       app.tabs.inject.js({
-        file: '/data/inject/mark.es6.js'
+        file: '/data/inject/' + utils.prefs.engine
       }),
       app.tabs.inject.css({
         code

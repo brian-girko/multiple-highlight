@@ -43,5 +43,8 @@
     "page": "data/options/index.html",
     "chrome_style": true,
     "open_in_tab": true
-  }
+  },
+  "web_accessible_resources": [
+    "data/inject/tbdm/tbdm.js"
+  ]
 }

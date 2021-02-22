@@ -4,6 +4,7 @@
 const toast = document.getElementById('toast');
 
 const prefs = {
+  'engine': 'mark.es6.js',
   'persistent': false,
   'clean-on-esc': true,
   'close-on-esc': true,
@@ -28,6 +29,7 @@ const prefs = {
 };
 
 app.storage.get(prefs).then(prefs => {
+  document.getElementById('engine').value = prefs.engine;
   document.getElementById('persistent').checked = prefs.persistent;
   document.getElementById('clean-on-esc').checked = prefs['clean-on-esc'];
   document.getElementById('close-on-esc').checked = prefs['close-on-esc'];
@@ -44,6 +46,7 @@ app.storage.get(prefs).then(prefs => {
 });
 
 document.getElementById('save').addEventListener('click', () => app.storage.set({
+  'engine': document.getElementById('engine').value,
   'persistent': document.getElementById('persistent').checked,
   'clean-on-esc': document.getElementById('clean-on-esc').checked,
   'close-on-esc': document.getElementById('close-on-esc').checked,

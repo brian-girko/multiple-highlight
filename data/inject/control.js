@@ -66,7 +66,14 @@
           keywords = query.split(separator);
         }
         keywords = keywords.map(s => s.trim())
-          .filter((s, i, l) => s && l.indexOf(s) === i && s.length >= prefs['min-length']);
+          .filter((s, i, l) => s && l.indexOf(s) === i).filter(s => {
+            if (s.indexOf(':') === -1) {
+              return s.length >= prefs['min-length'];
+            }
+            else {
+              return s.split(':')[1].length >= prefs['min-length'];
+            }
+          });
         // remove unused
         for (const i of Object.keys(cache)) {
           cache[i].forEach((keyword, j) => {
@@ -140,17 +147,29 @@
             }
           });
         }
+        let marks = [];
+        if ('apply' in instance) {
+          await instance.apply(() => {
+            marks = [...document.querySelectorAll('mark[data-markjs="true"]')];
+            port.postMessage({
+              method: 'stat',
+              total: marks.length,
+              offset: window.offset
+            });
+          });
+        }
         port.postMessage({
           method: 'clean',
           clean
         });
         //
-        const marks = [...document.querySelectorAll('mark[data-markjs="true"]')];
+        marks = [...document.querySelectorAll('mark[data-markjs="true"]')];
         // remove old actives
         for (const mark of [...document.querySelectorAll('mark[data-markjs="true"][data-active="true"]')]) {
         // any element in the view
           delete mark.dataset.active;
         }
+        window.total = marks.length;
         if (marks.length) {
           for (const mark of marks) {
             if (inViewport(mark)) {
@@ -158,12 +177,11 @@
               mark.focus();
 
               // persist for next use
-              window.total = marks.length;
               window.offset = marks.indexOf(mark);
               port.postMessage({
                 method: 'stat',
                 total: marks.length,
-                offset: marks.indexOf(mark)
+                offset: window.offset
               });
               break;
             }
@@ -201,25 +219,27 @@
       }
       else if (request.method === 'navigate') {
         const marks = [...document.querySelectorAll('mark[data-markjs="true"]')];
-        const active = document.querySelector('mark[data-markjs="true"][data-active="true"]');
-        const index = marks.indexOf(active);
-        if (index !== -1) {
-          delete active.dataset.active;
-          const offset = (marks.length + index + (request.type === 'forward' ? 1 : -1)) % (marks.length);
-          const e = marks[offset];
-          port.postMessage({
-            method: 'stat',
-            offset
-          });
-          e.dataset.active = true;
-          if (inViewport(e) === false) {
-            e.scrollIntoView(request.prefs['scroll-into-view']);
-          }
-          e.focus();
+        if (marks.length === 0) {
+          console.warn('no mark');
         }
-        else {
-          console.error('active index is -1', active);
+        let active = document.querySelector('mark[data-markjs="true"][data-active="true"]');
+        let index = marks.indexOf(active);
+        if (index === -1) {
+          active = marks[0];
+          index = 0;
         }
+        delete active.dataset.active;
+        const offset = (marks.length + index + (request.type === 'forward' ? 1 : -1)) % (marks.length);
+        const e = marks[offset];
+        port.postMessage({
+          method: 'stat',
+          offset
+        });
+        e.dataset.active = true;
+        if (inViewport(e) === false) {
+          e.scrollIntoView(request.prefs['scroll-into-view']);
+        }
+        e.focus();
       }
       else if (request.method === 'persistent') {
         persistent = true;
@@ -228,7 +248,6 @@
   };
   chrome.runtime.onConnect.addListener(connect);
 }
-
 
 ({
   query: window.query,
