@@ -20,6 +20,8 @@
     e.dataset.active = true;
   });
 
+  const qa = () => [...document.querySelectorAll('mark[data-markjs="true"]')]
+    .filter(m => m.offsetWidth && m.offsetHeight);
 
   const connect = port => {
     let persistent = false;
@@ -150,7 +152,7 @@
         let marks = [];
         if ('apply' in instance) {
           await instance.apply(() => {
-            marks = [...document.querySelectorAll('mark[data-markjs="true"]')];
+            marks = qa();
             port.postMessage({
               method: 'stat',
               total: marks.length,
@@ -163,7 +165,7 @@
           clean
         });
         //
-        marks = [...document.querySelectorAll('mark[data-markjs="true"]')];
+        marks = qa();
         // remove old actives
         for (const mark of [...document.querySelectorAll('mark[data-markjs="true"][data-active="true"]')]) {
         // any element in the view
@@ -218,7 +220,7 @@
         }
       }
       else if (request.method === 'navigate') {
-        const marks = [...document.querySelectorAll('mark[data-markjs="true"]')];
+        const marks = qa();
         if (marks.length === 0) {
           console.warn('no mark');
         }

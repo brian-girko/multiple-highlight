@@ -146,7 +146,7 @@ export default class TBDM extends CONFIG {
       while (node = iterator.nextNode()) {
         const parent = node.parentElement;
         // dealing with hidden elements
-        if (parent.offsetHeight === 0) {
+        if (parent.offsetHeight === 0 || parent.style.visibility === 'hidden') {
           continue;
         }
         // ignore empty nodes

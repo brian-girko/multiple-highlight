@@ -19,6 +19,7 @@ const utils = {
     'history-period': 10 * 24 * 60 * 60 * 1000,
     'history-mode': 'url', // url, hostname, global
     'shadow-size': 0,
+    'shadow-size-active': 0,
     'colors': {
       'a': ['#666666', '#ffff00', '#ffff00'],
       'b': ['#666666', '#ffc501', '#ffc501'],
@@ -30,7 +31,7 @@ const utils = {
       'h': ['#49186d', '#edd3ff', '#edd3ff'],
       'i': ['#5d0100', '#b8dbec', '#b8dbec'],
       'j': ['#ffeef7', '#34222c', '#34222c'],
-      '_': ['#303b49', '#abd1ff', '#96bbe8']
+      '_': ['#303b49', '#abd1ff', '#ffff00']
     },
     'custom-css': '',
     'no-active-rule': false
@@ -46,6 +47,8 @@ const utils = {
       mark[data-markjs="true"] {
         color: var(--map-one);
         background: transparent;
+        padding: 0;
+        margin: 0;
       }
       mark[data-markjs="true"][data-underline="true"] {
         text-decoration: underline;
@@ -113,7 +116,8 @@ const utils = {
         --map-two: ${colors._[1]};
         --map-three: ${colors._[2]};
         background: var(--map-two);
-        box-shadow: 0 0 0 ${utils.prefs['shadow-size']} var(--map-three);
+        box-shadow: 0 0 0 ${utils.prefs['shadow-size-active']}px var(--map-three);
+        transition: background-color 0.3s ease-in-out;
       }`;
     }
     code += utils.prefs['custom-css'];

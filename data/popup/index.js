@@ -66,7 +66,7 @@ app.storage.get(prefs).then(async ps => {
     const updateStat = request => {
       stat.total = 'total' in request ? request.total : stat.total;
       if (stat.total) {
-        stat.textContent = ((request.offset || 0) + 1) + '/' + stat.total;
+        stat.textContent = ((request.offset || 0) + 1) + ' of ' + stat.total;
       }
       else {
         stat.textContent = '0/0';
