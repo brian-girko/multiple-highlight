@@ -1,10 +1,16 @@
-import TBDM from './tbdm.js';
+/* global TBDM */
 
 const tb = new TBDM(document.getElementById('two'));
-tb.find('good', {
+
+console.time();
+// tb.find('good', {
+//   color: 'red'
+// }).find(/b..k/ig, {
+//   color: 'blue'
+// }).prepare();
+
+tb.find('This book', {
   color: 'red'
-}).find(/b..k/ig, {
-  color: 'blue'
 }).prepare();
 
 tb.each((node, extra) => {
@@ -13,3 +19,5 @@ tb.each((node, extra) => {
   mark.style.color = extra.color;
   node.replaceWith(mark);
 });
+
+console.timeEnd();

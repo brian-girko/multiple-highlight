@@ -9,7 +9,7 @@ class CONFIG {
   }
 }
 
-export default class TBDM extends CONFIG {
+class TBDM extends CONFIG {
   constructor(element) {
     super();
     this.element = element;
@@ -23,6 +23,10 @@ export default class TBDM extends CONFIG {
     })];
     // keeps no-space range objects ({start, word, extra}) to be marked
     this.ranges = [];
+    //
+    this.options = {
+      'no-hidden-element': true // this may slowdown on large documents
+    };
   }
   /* convert a normal range to a non-space {start, end, ...} range */
   convert({start, word}, index, extra = {}) {
@@ -55,7 +59,8 @@ export default class TBDM extends CONFIG {
         }
       }
       else {
-        let start = content.indexOf(query);
+        // handling &nbsp;
+        let start = content.replace(/\xA0/g, ' ').indexOf(query);
         while (start !== -1) {
           this.convert({ // this is range from
             start,
@@ -146,7 +151,10 @@ export default class TBDM extends CONFIG {
       while (node = iterator.nextNode()) {
         const parent = node.parentElement;
         // dealing with hidden elements
-        if (parent.offsetHeight === 0 || parent.style.visibility === 'hidden') {
+        if (parent.offsetHeight === 0) {
+          continue;
+        }
+        if (this.options['no-hidden-element'] && getComputedStyle(parent).visibility === 'hidden') {
           continue;
         }
         // ignore empty nodes

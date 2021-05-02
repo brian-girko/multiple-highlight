@@ -128,10 +128,10 @@ app.storage.get(prefs).then(async ps => {
     search.addEventListener('input', input);
     // navigate
     search.addEventListener('keyup', e => {
-      if (e.code === 'Enter' && e.shiftKey) {
+      if (e.key === 'Enter' && e.shiftKey) {
         backward.click();
       }
-      else if (e.code === 'Enter') {
+      else if (e.key === 'Enter') {
         forward.click();
       }
     });

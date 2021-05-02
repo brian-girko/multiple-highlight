@@ -1,4 +1,4 @@
-'use strict';
+/* global TBDM */
 
 class Mark {
   constructor() {
@@ -34,8 +34,6 @@ class Mark {
     });
   }
   async apply(done = () => {}) {
-    const o = await import('./tbdm/tbdm.js');
-    const TBDM = o.default;
     const tb = this.tb = new TBDM(document.body);
     for (const {query, options} of this.queires) {
       if (typeof query === 'string') {

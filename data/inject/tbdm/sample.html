@@ -23,13 +23,20 @@
 
     <div>0. This bo<span>ok</span> is good.</div>
     <div>1. This book is good.</div>
-    <div style="visibility: hidden;">This book is good.</div>
+    <div style="visibility: hidden;">
+      <span>This book is good.</span>
+    </div>
     <div>2. This book is good.</div>
-    <div>3. This book is good.</div>
+    <div>3. This&nbsp;book is good (nbsp).</div>
+    <div>4. This&nbsp; book is good (nbsp + space).</div>
+    <div>5. <b>This</b> <b>book</b> is good</div>
   </div>
+
+
 
   <p id="three">this is a book (ignore)</p>
 
-  <script type="module" src="sample.js"></script>
+  <script src="tbdm.js"></script>
+  <script src="sample.js"></script>
 </body>
 </html>

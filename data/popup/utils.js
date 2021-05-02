@@ -121,14 +121,28 @@ const utils = {
       }`;
     }
     code += utils.prefs['custom-css'];
-    await Promise.all([
-      app.tabs.inject.js({
-        file: '/data/inject/' + utils.prefs.engine
-      }),
-      app.tabs.inject.css({
-        code
-      })
-    ]);
+    if (utils.prefs.engine === 'mark.es6.js') {
+      await Promise.all([
+        app.tabs.inject.js({
+          file: '/data/inject/mark.es6.js'
+        }),
+        app.tabs.inject.css({
+          code
+        })
+      ]);
+    }
+    else {
+      await Promise.all([
+        app.tabs.inject.js({
+          file: '/data/inject/tbdm/tbdm.js'
+        }).then(() => app.tabs.inject.js({
+          file: '/data/inject/tbdm.es6.js'
+        })),
+        app.tabs.inject.css({
+          code
+        })
+      ]);
+    }
   }
 };
 utils.inject = async colors => {
