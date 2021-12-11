@@ -100,8 +100,11 @@ const connect = port => {
       window.instance = new Find(words);
       window.instance.options['selection-color'] = prefs[cname]['_'][1];
 
+      console.log('nodes');
       window.instance.nodes();
+      console.log('highlight');
       window.instance.highlight();
+      console.log('highlight end');
 
       if (isNaN(window.offset)) {
         window.instance.next();
