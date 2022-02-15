@@ -7,12 +7,12 @@ class HFind extends Find {
 
     this.canvases = new Map();
 
-    this.options['draw-delay'] = 0; // ms
-    this.options['canvas-opacity'] = 0.3;
-    this.options['canvas-height'] = 2;
-    this.options['canvas-offset'] = 2;
+    this.options['draw-delay'] = -1; // ms
+    this.options['canvas-opacity'] = 1;
+    this.options['canvas-padding'] = 2;
+    this.options['canvas-margin'] = 200;
   }
-  canvas(doc) {
+  canvas(doc, blend = 'multiply') { // multiply, lighten;
     if (this.canvases.has(doc)) {
       return this.canvases.get(doc);
     }
@@ -23,6 +23,7 @@ class HFind extends Find {
       left: 0;
       pointer-events: none;
       z-index: 2147483647;
+      mix-blend-mode: ${blend};
     `;
     canvas.width = doc.documentElement.clientWidth;
     canvas.height = doc.documentElement.clientHeight;
@@ -53,23 +54,17 @@ class HFind extends Find {
         const width = Math.ceil(box.width);
         const height = Math.ceil(box.height);
 
+        const cords = [
+          x - this.options['canvas-padding'],
+          y - this.options['canvas-padding'],
+          width + 2 * this.options['canvas-padding'],
+          height + 2 * this.options['canvas-padding']
+        ];
         if (clear) {
-          ctx.clearRect(x, y + this.options['canvas-offset'], width, height);
+          ctx.clearRect(...cords);
         }
-
-        if (color) {
-          ctx.globalAlpha = this.options['canvas-opacity'];
-          ctx.fillRect(x, y + this.options['canvas-offset'], width, height);
-        }
-        else {
-          ctx.globalAlpha = 1;
-          ctx.fillRect(
-            x,
-            y + this.options['canvas-offset'] + height - this.options['canvas-height'],
-            width,
-            this.options['canvas-height']
-          );
-        }
+        ctx.globalAlpha = this.options['canvas-opacity'];
+        ctx.fillRect(...cords);
       }
     }
   }
@@ -86,7 +81,7 @@ class HFind extends Find {
               y += offset;
               // w -= offset;
             }
-            return y > -10 && y < w + 10;
+            return y > -this.options['canvas-margin'] && y < w + this.options['canvas-margin'];
           });
         }
         resolve();
