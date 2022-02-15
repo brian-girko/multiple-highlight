@@ -3,7 +3,7 @@
 const words = [
   new SWord('this', {
     'color': '#000',
-    'background-color': 'rgba(0, 0, 255)'
+    'background-color': 'rgba(0, 140, 255)'
   }),
   new SWord('book')
 ];
