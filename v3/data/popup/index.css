@@ -16,7 +16,7 @@ select {
   -webkit-appearance: none;
   -moz-appearance: none;
   cursor: pointer;
-  text-align-last:center;
+  text-align-last: center;
 }
 input[type=button] {
   border: none;
@@ -61,6 +61,9 @@ input[type=button]:not(:disabled):hover {
   padding: 10px 5px;
   font-size: 15px;
 }
+#search:disabled {
+  color: #ff3333;
+}
 #search[data-clean="false"] {
   color: #ec3a3a;
 }
@@ -68,6 +71,15 @@ input[type=button]:not(:disabled):hover {
   margin-left: 5px;
   cursor: pointer;
 }
-#stat {
-
+#search-container {
+  display: flex;
+}
+#search-container select {
+  text-indent: 100px;
+  max-width: 32px;
+  background: #cfcfcf url(img/dropdown.svg) no-repeat left 11px center;
+  background-size: 10px;
+}
+#search-container select:not(:empty) {
+  width: 32px;
 }

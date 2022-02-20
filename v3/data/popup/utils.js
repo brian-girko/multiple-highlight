@@ -27,16 +27,16 @@ utils.prefs = {
     '_': ['#303b49', '#abd1ff']
   },
   'canvas-colors': {
-    'a': [0, '#ccf62c'],
-    'b': [0, '#ff9629'],
-    'c': [0, '#f349d3'],
-    'd': [0, '#f349d3'],
-    'e': [0, '#f349d3'],
-    'f': [0, '#f16472'],
-    'g': [0, '#e29253'],
-    'h': [0, '#f16472'],
-    'i': [0, '#c48fee'],
-    'j': [0, '#7ce485'],
+    'a': [0, '#ffff00'],
+    'b': [0, '#ffc501'],
+    'c': [0, '#b5fa01'],
+    'd': [0, '#fd13f0'],
+    'e': [0, '#fff5cc'],
+    'f': [0, '#ffa0a0'],
+    'g': [0, '#dae0ff'],
+    'h': [0, '#edd3ff'],
+    'i': [0, '#b8dbec'],
+    'j': [0, '#34222c'],
     '_': [0, '#abd1ff']
   },
   'highlighting-method': 'canvas', // native, canvas, mix
@@ -59,4 +59,73 @@ utils.ckey = (mode, url) => {
   else {
     return url.split('#')[0];
   }
+};
+
+utils.inject = async (tab, prefs) => {
+  // do we have the tbdm lib on this tab
+  const r = await chrome.scripting.executeScript({
+    target: {
+      tabId: tab.id
+    },
+    func: () => ({
+      ready: typeof CFind !== 'undefined',
+      query: window.query,
+      total: window.total,
+      offset: window.offset,
+      length: document.documentElement.innerText.length
+    })
+  });
+  if (r[0].result.ready === false) {
+    await chrome.scripting.executeScript({
+      target: {
+        tabId: tab.id
+      },
+      files: ['/data/inject/tbdm/core.js']
+    });
+    if (prefs['consider-frames']) {
+      await chrome.scripting.executeScript({
+        target: {
+          tabId: tab.id
+        },
+        files: ['/data/inject/tbdm/tree.js']
+      });
+    }
+
+    const native = prefs['highlighting-method'] === 'native' ? true : (
+      prefs['highlighting-method'] === 'canvas' ? false : (
+        r[0].result.length > prefs['max-length-for-native'] ? false : true
+      )
+    );
+    if (native) {
+      await chrome.scripting.executeScript({
+        target: {
+          tabId: tab.id
+        },
+        files: ['/data/inject/tbdm/core-navigate.js']
+      });
+    }
+    else {
+      await chrome.scripting.executeScript({
+        target: {
+          tabId: tab.id
+        },
+        files: ['/data/inject/tbdm/canvas.js']
+      });
+      await chrome.scripting.executeScript({
+        target: {
+          tabId: tab.id
+        },
+        files: ['/data/inject/tbdm/canvas-navigate.js']
+      });
+    }
+
+    await chrome.scripting.executeScript({
+      target: {
+        tabId: tab.id
+      },
+      files: ['/data/inject/control.js']
+    });
+  }
+
+  return r;
 };

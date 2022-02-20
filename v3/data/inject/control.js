@@ -67,7 +67,7 @@ const connect = port => {
         const bold = command && command.indexOf('b') !== -1;
         const highlight = (underline || bold) ? command.indexOf('h') !== -1 : true;
 
-        const color = request.prefs[cname][String.fromCharCode(97 + n % 10)];
+        const color = request.prefs[cname][String.fromCharCode(97 + n % 9)];
         const style = {
           'color': color[0],
           'background-color': color[1]

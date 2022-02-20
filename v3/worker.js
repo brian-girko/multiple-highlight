@@ -1,5 +1,6 @@
-/* global utils, app */
-'use strict';
+/* global utils */
+
+self.importScripts('data/popup/utils.js');
 
 // delete history when it is disabled
 chrome.storage.onChanged.addListener(prefs => {
@@ -11,55 +12,33 @@ chrome.storage.onChanged.addListener(prefs => {
 });
 
 //
-chrome.commands.onCommand.addListener(command => {
-  if (command === 'ckey_highlight') {
-    chrome.tabs.query({
-      active: true,
-      currentWindow: true
-    }, tabs => {
-      if (tabs.length) {
-        const tab = tabs[0];
-        chrome.storage.local.get(utils.prefs, prefs => {
-          const ckey = utils.ckey(prefs['history-mode'], tab.url);
+chrome.commands.onCommand.addListener((command, tab) => {
+  if (command === 'ckey_highlight' && tab) {
+    chrome.storage.local.get(utils.prefs, async prefs => {
+      const ckey = utils.ckey(prefs['history-mode'], tab.url);
+      const v = prefs['history-cache'][ckey];
 
-          const v = prefs['history-cache'][ckey];
-          if (v && prefs['history-enabled']) {
-            utils.inject(prefs.colors).then(async () => {
-              await app.tabs.inject.js({
-                file: '/data/inject/control.js'
-              });
-              const port = app.runtime.connect(tab.id, {
-                name: 'highlight'
-              });
-              port.post({
-                method: 'search',
-                query: v.query,
-                separator: prefs.separator,
-                prefs,
-                origin: 'background'
-              });
-            });
-          }
+      if (v && prefs['history-enabled']) {
+        await utils.inject(tab, prefs);
+        const port = chrome.tabs.connect(tab.id, {
+          name: 'highlight'
+        });
+        port.postMessage({
+          method: 'search',
+          query: v.query,
+          separator: prefs.separator,
+          prefs,
+          origin: 'background'
         });
       }
     });
   }
-  else if (command === 'remove_highlight') {
-    chrome.storage.local.get(utils.prefs, prefs => {
-      utils.inject(prefs.colors).then(() => {
-        app.tabs.inject.js({
-          file: '/data/inject/mark.es6.js'
-        }).then(() => app.tabs.inject.js({
-          code: `{
-            const instance = new Mark(document.body);
-            delete window.cache;
-            delete window.query;
-            delete window.offset;
-            delete window.total;
-            instance.unmark();
-          }`
-        }));
-      });
+  else if (command === 'remove_highlight' && tab) {
+    chrome.scripting.executeScript({
+      target: {
+        tabId: tab.id
+      },
+      func: () => window.instance.destroy()
     });
   }
 });

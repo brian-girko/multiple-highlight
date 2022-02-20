@@ -13,42 +13,45 @@ const datalist = () => {
   if (search.value && tab && tab.url && (tab.url.startsWith('http') || tab.url.startsWith('file'))) {
     datalist.cache.unshift(search.value);
     datalist.cache = datalist.cache.filter((s, i, l) => l.indexOf(s) === i);
-    datalist.cache = datalist.cache.slice(0, 8);
+    datalist.cache = datalist.cache.slice(0, 20);
 
     datalist.update();
 
+    const ckey = utils.ckey(prefs['history-mode'], tab.url);
+
     chrome.storage.local.set({
-      [datalist.hostname + '-' + 'datalist']: datalist.cache
+      [ckey + '-' + 'datalist']: datalist.cache
     });
   }
 };
 datalist.cache = [];
 datalist.available = false;
 datalist.update = () => {
-  for (let i = 0; i < 8; i += 1) {
-    const e = document.querySelector(`#datalist option:nth-child(${i + 1})`);
-    if (datalist.cache[i]) {
-      e.value = datalist.cache[i];
-      e.disabled = false;
+  const parent = document.getElementById('history');
+  parent.textContent = '';
+
+  for (let i = 0; i < datalist.cache.length; i += 1) {
+    const option = document.createElement('option');
+    option.value = option.textContent = datalist.cache[i];
+
+    if (search.value === option.value) {
+      option.checked = true;
     }
-    else {
-      e.disabled = true;
-    }
+    parent.appendChild(option);
   }
+  parent.value = '';
 };
 datalist.activate = () => {
   datalist.available = prefs['datalist-enabled'] && tab && tab.url &&
     (tab.url.startsWith('http') || tab.url.startsWith('file'));
 
   if (datalist.available) {
-    const {hostname} = new URL(tab.url);
-    datalist.hostname = hostname;
+    const ckey = utils.ckey(prefs['history-mode'], tab.url);
 
-    const key = datalist.hostname + '-datalist';
     chrome.storage.local.get({
-      [key]: []
+      [ckey + '-' + 'datalist']: []
     }, prefs => {
-      datalist.cache = prefs[key];
+      datalist.cache = prefs[ckey + '-' + 'datalist'];
       datalist.update();
     });
   }
@@ -75,70 +78,8 @@ chrome.storage.local.get(prefs, async ps => {
       active: true,
       currentWindow: true
     });
-    // do we have the tbdm lib on this tab
-    const r = await chrome.scripting.executeScript({
-      target: {
-        tabId: tab.id
-      },
-      func: () => ({
-        ready: typeof CFind !== 'undefined',
-        query: window.query,
-        total: window.total,
-        offset: window.offset,
-        length: document.documentElement.innerText.length
-      })
-    });
-    if (r[0].result.ready === false) {
-      await chrome.scripting.executeScript({
-        target: {
-          tabId: tab.id
-        },
-        files: ['/data/inject/tbdm/core.js']
-      });
-      if (prefs['consider-frames']) {
-        await chrome.scripting.executeScript({
-          target: {
-            tabId: tab.id
-          },
-          files: ['/data/inject/tbdm/tree.js']
-        });
-      }
 
-      const native = prefs['highlighting-method'] === 'native' ? true : (
-        prefs['highlighting-method'] === 'canvas' ? false : (
-          r[0].result.length > prefs['max-length-for-native'] ? false : true
-        )
-      );
-      if (native) {
-        await chrome.scripting.executeScript({
-          target: {
-            tabId: tab.id
-          },
-          files: ['/data/inject/tbdm/core-navigate.js']
-        });
-      }
-      else {
-        await chrome.scripting.executeScript({
-          target: {
-            tabId: tab.id
-          },
-          files: ['/data/inject/tbdm/canvas.js']
-        });
-        await chrome.scripting.executeScript({
-          target: {
-            tabId: tab.id
-          },
-          files: ['/data/inject/tbdm/canvas-navigate.js']
-        });
-      }
-
-      await chrome.scripting.executeScript({
-        target: {
-          tabId: tab.id
-        },
-        files: ['/data/inject/control.js']
-      });
-    }
+    const r = await utils.inject(tab, prefs);
 
     datalist.activate();
 
@@ -198,7 +139,7 @@ chrome.storage.local.get(prefs, async ps => {
       }
     });
     separator.addEventListener('change', () => port.postMessage({
-      method: 'reset',
+      method: 'search',
       query: search.value,
       separator: separator.value,
       prefs
@@ -291,3 +232,9 @@ document.addEventListener('DOMContentLoaded', () => {
   window.setTimeout(() => search.focus(), 0);
 });
 
+// history
+document.getElementById('history').addEventListener('change', e => {
+  search.value = e.target.value;
+  search.dispatchEvent(new Event('search'));
+  search.dispatchEvent(new Event('input'));
+});

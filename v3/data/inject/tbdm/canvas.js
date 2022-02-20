@@ -9,7 +9,7 @@ class HFind extends Find {
 
     this.options['draw-delay'] = -1; // ms
     this.options['canvas-opacity'] = 1;
-    this.options['canvas-padding'] = 2;
+    this.options['canvas-padding'] = 0;
     this.options['canvas-margin'] = 200;
   }
   canvas(doc, blend = 'multiply') { // multiply, lighten;
@@ -102,6 +102,7 @@ class HFind extends Find {
       this.paint = c.bind(this);
 
       this.paint();
+      document.addEventListener('visibilitychange', this.paint);
       for (const doc of this.docs) {
         doc.addEventListener('scroll', this.paint);
         doc.defaultView.addEventListener('resize', this.paint);
@@ -118,6 +119,7 @@ class HFind extends Find {
     }
     delete this.canvases;
 
+    document.removeEventListener('visibilitychange', this.paint);
     for (const doc of this.docs) {
       doc.removeEventListener('scroll', this.paint);
       doc.defaultView.removeEventListener('resize', this.paint);
