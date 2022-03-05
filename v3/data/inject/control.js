@@ -57,9 +57,6 @@ const connect = port => {
         }
       });
 
-      const isCanvas = Boolean(Find.prototype.canvas);
-      const cname = isCanvas ? 'canvas-colors' : 'colors';
-
       const words = keywords.map((s, n) => {
         const command = s.indexOf(':') === -1 ? '' : s.split(':')[0].toLowerCase();
         const pk = command ? s.substr(command.length + 1) : s;
@@ -67,7 +64,7 @@ const connect = port => {
         const bold = command && command.indexOf('b') !== -1;
         const highlight = (underline || bold) ? command.indexOf('h') !== -1 : true;
 
-        const color = request.prefs[cname][String.fromCharCode(97 + n % 9)];
+        const color = request.prefs.colors[String.fromCharCode(97 + n % 9)];
         const style = {
           'color': color[0],
           'background-color': color[1]
@@ -78,7 +75,7 @@ const connect = port => {
         if (bold) {
           style['font-weight'] = 'bold';
         }
-        if (highlight === false && !Find.prototype.canvas) {
+        if (highlight === false) {
           style['background-color'] = 'transparent';
         }
 
@@ -97,14 +94,17 @@ const connect = port => {
         return new SWord(pk, style);
       });
 
-      window.instance = new Find(words);
-      window.instance.options['selection-color'] = prefs[cname]['_'][1];
+      const instances = [];
+      window.instance = new Find(words, document, {
+        'active-color': prefs.colors['_'][0],
+        'active-background-color': prefs.colors['_'][1]
+      }, instances);
 
       window.instance.nodes();
       window.instance.highlight();
 
       if (isNaN(window.offset)) {
-        window.instance.next();
+        window.instance.navigate(1);
       }
       else {
         window.instance.stats.cursor = window.offset;
@@ -118,7 +118,7 @@ const connect = port => {
       }
     }
     else if (request.method === 'navigate') {
-      window.instance[request.type === 'forward' ? 'next' : 'previous']();
+      window.instance.navigate(request.type === 'forward' ? 1 : -1);
       update();
     }
     else if (request.method === 'persistent') {

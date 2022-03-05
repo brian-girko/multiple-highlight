@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "version": "0.4.2",
-  "name": "Multiple Search and Highlight (Developer)",
+  "version": "0.4.3",
+  "name": "Multiple Search and Highlight",
   "description": "Highlight multiple words separated by comma, space or arbitrary separator with persistent history",
   "permissions": [
     "storage",

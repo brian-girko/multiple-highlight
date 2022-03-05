@@ -57,7 +57,7 @@ a:visited {
 
 .colors {
   display: grid;
-  grid-template-columns: 1fr min-content min-content min-content;
+  grid-template-columns: 1fr min-content min-content;
   white-space: nowrap;
   grid-gap: 10px;
 }

@@ -1,34 +1,61 @@
 /* global Find */
 
 class TCFind extends Find {
-  tree(root = document.body, condition = () => NodeFilter.FILTER_ACCEPT, each = () => {}) {
-    const fc = n => {
-      if (n.tagName === 'IFRAME' || n.tagName === 'FRAME') {
-        try {
-          if (n.contentDocument.body) {
-            n.contentDocument.parent = n; // reference
-            n.contentDocument.top = n.offsetTop; // reference
-            if (n.parent && n.parent.top) {
-              n.contentDocument.top += n.parent.top;
-            }
+  constructor(words, doc = document, options = {}, instances = []) {
+    super(words, doc, options, instances);
 
-            super.tree(n.contentDocument.body, fc, each);
-            if (this.docs) {
-              this.docs.push(n.contentDocument);
-            }
-          }
-          return NodeFilter.FILTER_REJECT;
+    this.childs = [];
+    this.instances = instances;
+    this.stats.n = 0;
+
+    for (const i of instances) {
+      if (i.doc === doc) {
+        return;
+      }
+    }
+    instances.push(this);
+
+    for (const e of [...doc.querySelectorAll('iframe')]) {
+      try {
+        if (e.contentDocument) {
+          const f = new Find(words, e.contentDocument, options, instances);
+          this.childs.push(f);
         }
-        catch (e) {}
       }
-      if (n.innerText === '' && n.querySelector('iframe')) {
-        return NodeFilter.FILTER_ACCEPT;
+      catch (e) {}
+    }
+  }
+  highlight(...args) {
+    super.highlight(...args);
+    for (const f of this.childs) {
+      f.highlight(...args);
+    }
+  }
+  destroy(...args) {
+    super.destroy(...args);
+    for (const f of this.childs) {
+      f.destroy(...args);
+    }
+  }
+  /**/
+  navigate(step = 1) {
+    this.instances[this.stats.n][step > 0 ? 'next' : 'previous']((range, found, c) => {
+      if (found) {
+        c();
       }
+      else {
+        this.stats.n += step;
+        this.stats.n = (this.stats.n + this.instances.length) % this.instances.length;
 
-      return condition(n);
-    };
-
-    super.tree(root, fc, each);
+        // reset
+        if (this.stats.n === 0) {
+          for (const f of this.instances) {
+            f.stats.cursor = -1;
+          }
+        }
+        this.navigate(step);
+      }
+    });
   }
 }
 

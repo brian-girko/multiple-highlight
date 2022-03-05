@@ -56,24 +56,13 @@ class RWord {
 
 class Node {
   static isInViewport(n) {
-    const box = n.getBoundingClientRect();
-    const doc = n.ownerDocument;
-
-    // parent window is not in the viewport
-    let offset = 0;
-    if (doc.top) {
-      offset = doc.top - document.documentElement.scrollTop;
-    }
-
-    const height = Math.min(doc.top + doc.documentElement.clientHeight, document.documentElement.clientHeight) -
-      doc.top;
-
-    return (
-      box.top + offset >= 0 &&
-      box.left >= 0 &&
-      box.bottom + offset <= height &&
-      box.right <= document.documentElement.clientWidth
-    );
+    return new Promise(resolve => {
+      const doc = n.ownerDocument;
+      const o = new doc.defaultView.IntersectionObserver(es => {
+        resolve(es.some(e => e.isIntersecting));
+      }, {threshold: 0.5});
+      o.observe(n);
+    });
   }
   constructor(e, count = 0) {
     this.e = e;
@@ -93,7 +82,7 @@ class Node {
     return this.e.innerText.replace(/[\n\t]/g, '');
   }
   /* extract all ranges for a node */
-  ranges(words, history) {
+  ranges(words, history, custom = () => {}) {
     // [[start, end, type], ...]
     let ranges = words.map((w, n) => w.ranges(this.toString()).map(r => [...r, n])).flat().sort((a, b) => {
       return a[0] - b[0];
@@ -110,7 +99,8 @@ class Node {
     // extract text nodes
     const content = this.toString();
 
-    const walk = document.createTreeWalker(this.e, NodeFilter.SHOW_TEXT, {
+    const doc = this.e.ownerDocument;
+    const walk = doc.createTreeWalker(this.e, NodeFilter.SHOW_TEXT, {
       acceptNode: () => {
         return NodeFilter.FILTER_ACCEPT;
       }
@@ -127,7 +117,7 @@ class Node {
     };
     update();
     let range = ranges.shift();
-    let e = document.createRange();
+    let e = doc.createRange();
 
     const track = () => {
       const out = [];
@@ -146,7 +136,7 @@ class Node {
             if (range[1] === position) {
               e.setEnd(t, x + 1);
               if (ignore === false) {
-                e.style = this.words[range[2]].style;
+                custom(e, this.words[range[2]]);
                 out.push(e);
               }
 
@@ -155,7 +145,7 @@ class Node {
               if (!range) {
                 return out;
               }
-              e = document.createRange();
+              e = doc.createRange();
             }
             if (update() === false) {
               throw Error('position reached');
@@ -171,23 +161,45 @@ class Node {
 }
 
 class CFind {
-  constructor(words) {
-    this.type = 'MARK';
-
+  constructor(words, doc = document, options = {}) {
     this.words = words;
+    this.doc = doc;
+    this.options = options;
 
-    const doc = document;
-    doc.top = 0;
-    this.docs = [doc];
+    if (!doc) {
+      throw Error('document is mandatory');
+    }
+
+    // styling
+    this.highlights = new Map();
+    this.styling();
 
     this.stats = {
       total: 0
     };
-
-    this.options = {};
   }
-  tree(root = document.body, condition = () => NodeFilter.FILTER_ACCEPT, each = () => {}) {
-    const walk = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
+  styling() {
+    const style = this.style = this.doc.createElement('style');
+    style.textContent = '';
+
+    this.words.forEach((word, n) => {
+      const name = 'tbdm-highlighter-' + n;
+
+      const highlight = new this.doc.defaultView.Highlight();
+      this.doc.defaultView.CSS.highlights.set(name, highlight);
+      this.highlights.set(word, highlight);
+
+      style.textContent += `
+        ::highlight(${name}) {
+          background-color: ${word.style['background-color']};
+          color: ${word.style.color};
+        }
+      `;
+    });
+    this.doc.body.appendChild(style);
+  }
+  tree(root = this.doc.body, condition = () => NodeFilter.FILTER_ACCEPT, each = () => {}) {
+    const walk = this.doc.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
       acceptNode(n) {
         return condition(n);
       }
@@ -197,7 +209,6 @@ class CFind {
       each(node);
     }
   }
-
   nodes() {
     /* create a tree */
     const tree = new Node();
@@ -227,7 +238,7 @@ class CFind {
         n.words = this.words.filter((d, n) => a[n]);
       }
     };
-    this.tree(document.body, condition, each);
+    this.tree(this.doc.body, condition, each);
 
     /* find nodes */
     const nodes = [];
@@ -239,16 +250,16 @@ class CFind {
     };
     once(tree);
 
-    this._nodes = nodes;
-    this.nodes = () => this._nodes;
-
-    return this._nodes;
+    this.nodes = () => nodes;
+    return nodes;
   }
-  ranges() {
+  highlight() {
     const history = new Set();
-    this._ranges = this.nodes().map(n => {
+    const ranges = this.ranges = this.nodes().map(n => {
       try {
-        return n.ranges(n.words, history);
+        return n.ranges(n.words, history, (range, word) => {
+          this.highlights.get(word).add(range);
+        });
       }
       catch (e) {
         console.warn('cannot extract ranges of a node', n, e);
@@ -256,43 +267,16 @@ class CFind {
       }
     }).flat();
 
-    delete this._nodes;
-
-    this.stats.total = this._ranges.length;
-    this.ranges = () => this._ranges;
-
-    return this._ranges;
-  }
-  highlight() {
-    for (const range of this.ranges()) {
-      const mark = document.createElement('mark');
-      Object.assign(mark.style, range.style);
-
-      mark.classList.add('tbdm');
-      mark.appendChild(range.extractContents());
-      range.insertNode(mark);
-
-      range.mark = mark;
-    }
+    this.stats.total = ranges.length;
   }
   destroy() {
-    if (this.type === 'MARK') {
-      for (const doc of this.docs) {
-        for (const mark of [...doc.querySelectorAll('mark.tbdm')]) {
-          const f = document.createDocumentFragment();
-          for (const n of [...mark.childNodes]) {
-            f.appendChild(n);
-          }
-          mark.replaceWith(f);
-        }
-      }
-    }
+    this.doc.defaultView.CSS.highlights.clear();
+
+    this.style.remove();
 
     delete this.words;
     delete this.stats;
     delete this.options;
-    delete this._nodes;
-    delete this._ranges;
   }
 }
 

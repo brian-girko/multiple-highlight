@@ -8,7 +8,6 @@ const prefs = utils.prefs;
 chrome.storage.local.get(prefs, ps => {
   Object.assign(prefs, ps);
 
-  document.getElementById('highlighting-method').value = prefs['highlighting-method'];
   document.getElementById('persistent').checked = prefs.persistent;
   document.getElementById('clean-on-esc').checked = prefs['clean-on-esc'];
   document.getElementById('close-on-esc').checked = prefs['close-on-esc'];
@@ -16,12 +15,9 @@ chrome.storage.local.get(prefs, ps => {
   document.getElementById('history-enabled').checked = prefs['history-enabled'];
   document.getElementById('history-mode').value = prefs['history-mode'];
   for (const [key, [c, b]] of Object.entries(prefs.colors)) {
-    const cn = prefs['canvas-colors'][key][1];
-
     const parent = document.querySelector(`[data-id="${key}"]`);
     parent.children[1].value = c;
     parent.children[2].value = b;
-    parent.children[3].value = cn;
   }
 });
 
@@ -35,12 +31,7 @@ document.getElementById('save').addEventListener('click', () => chrome.storage.l
   'colors': [...document.querySelectorAll('[data-id]')].reduce((p, e) => {
     p[e.dataset.id] = [e.children[1].value, e.children[2].value];
     return p;
-  }, {}),
-  'canvas-colors': [...document.querySelectorAll('[data-id]')].reduce((p, e) => {
-    p[e.dataset.id] = [0, e.children[3].value];
-    return p;
-  }, {}),
-  'highlighting-method': document.getElementById('highlighting-method').value
+  }, {})
 }, () => {
   if (document.getElementById('datalist-enabled').checked === false) {
     chrome.storage.local.get(null, prefs => {

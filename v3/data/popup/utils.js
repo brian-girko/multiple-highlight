@@ -14,33 +14,18 @@ utils.prefs = {
   'history-period': 10 * 24 * 60 * 60 * 1000,
   'history-mode': 'url', // url, hostname, global
   'colors': {
-    'a': ['#666666', '#ffff00'],
-    'b': ['#666666', '#ffc501'],
-    'c': ['#666666', '#b5fa01'],
+    'a': ['#000', '#ffff00'],
+    'b': ['#000', '#ffc501'],
+    'c': ['#000', '#b5fa01'],
     'd': ['#49186d', '#fd13f0'],
-    'e': ['#666666', '#fff5cc'],
+    'e': ['#000', '#fff5cc'],
     'f': ['#5d0100', '#ffa0a0'],
-    'g': ['#666666', '#dae0ff'],
+    'g': ['#000', '#dae0ff'],
     'h': ['#49186d', '#edd3ff'],
     'i': ['#5d0100', '#b8dbec'],
     'j': ['#ffeef7', '#34222c'],
     '_': ['#303b49', '#abd1ff']
   },
-  'canvas-colors': {
-    'a': [0, '#ffff00'],
-    'b': [0, '#ffc501'],
-    'c': [0, '#b5fa01'],
-    'd': [0, '#fd13f0'],
-    'e': [0, '#fff5cc'],
-    'f': [0, '#ffa0a0'],
-    'g': [0, '#dae0ff'],
-    'h': [0, '#edd3ff'],
-    'i': [0, '#b8dbec'],
-    'j': [0, '#34222c'],
-    '_': [0, '#abd1ff']
-  },
-  'highlighting-method': 'canvas', // native, canvas, mix
-  'max-length-for-native': 100000,
   'consider-frames': true
 };
 
@@ -82,40 +67,18 @@ utils.inject = async (tab, prefs) => {
       },
       files: ['/data/inject/tbdm/core.js']
     });
+    await chrome.scripting.executeScript({
+      target: {
+        tabId: tab.id
+      },
+      files: ['/data/inject/tbdm/navigate.js']
+    });
     if (prefs['consider-frames']) {
       await chrome.scripting.executeScript({
         target: {
           tabId: tab.id
         },
         files: ['/data/inject/tbdm/tree.js']
-      });
-    }
-
-    const native = prefs['highlighting-method'] === 'native' ? true : (
-      prefs['highlighting-method'] === 'canvas' ? false : (
-        r[0].result.length > prefs['max-length-for-native'] ? false : true
-      )
-    );
-    if (native) {
-      await chrome.scripting.executeScript({
-        target: {
-          tabId: tab.id
-        },
-        files: ['/data/inject/tbdm/core-navigate.js']
-      });
-    }
-    else {
-      await chrome.scripting.executeScript({
-        target: {
-          tabId: tab.id
-        },
-        files: ['/data/inject/tbdm/canvas.js']
-      });
-      await chrome.scripting.executeScript({
-        target: {
-          tabId: tab.id
-        },
-        files: ['/data/inject/tbdm/canvas-navigate.js']
       });
     }
 

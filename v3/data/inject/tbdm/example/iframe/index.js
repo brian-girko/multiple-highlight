@@ -8,8 +8,19 @@ const words = [
   new RWord(/b..k/i)
 ];
 
-const f = new Find(words);
 window.addEventListener('load', () => {
+  const instances = [];
+
+  const f = self.f = new Find(words, document, instances);
   f.nodes();
   f.highlight();
+
+  document.getElementById('next').onclick = () => {
+    f.navigate(1);
+  };
+
+  document.getElementById('previous').onclick = () => {
+    f.navigate(-1);
+  };
 });
+
