@@ -238,3 +238,13 @@ document.getElementById('history').addEventListener('change', e => {
   search.dispatchEvent(new Event('search'));
   search.dispatchEvent(new Event('input'));
 });
+
+//
+if (!CSS.highlights) {
+  search.value = 'Please enable chrome://flags/#enable-experimental-web-platform-features';
+  search.disabled = true;
+
+  setTimeout(() => chrome.tabs.create({
+    url: 'chrome://flags/#enable-experimental-web-platform-features'
+  }), 3000);
+}
