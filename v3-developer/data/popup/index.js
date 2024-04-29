@@ -1,4 +1,4 @@
-/* global app, utils */
+/* globals utils */
 const search = document.getElementById('search');
 const separator = document.getElementById('separator');
 const stat = document.getElementById('stat');
@@ -13,90 +13,83 @@ const datalist = () => {
   if (search.value && tab && tab.url && (tab.url.startsWith('http') || tab.url.startsWith('file'))) {
     datalist.cache.unshift(search.value);
     datalist.cache = datalist.cache.filter((s, i, l) => l.indexOf(s) === i);
-    datalist.cache = datalist.cache.slice(0, 8);
+    datalist.cache = datalist.cache.slice(0, 20);
 
     datalist.update();
 
+    const ckey = utils.ckey(prefs['history-mode'], tab.url);
+
     chrome.storage.local.set({
-      [datalist.hostname + '-' + 'datalist']: datalist.cache
+      [ckey + '-' + 'datalist']: datalist.cache
     });
   }
 };
 datalist.cache = [];
 datalist.available = false;
 datalist.update = () => {
-  for (let i = 0; i < 8; i += 1) {
-    const e = document.querySelector(`#datalist option:nth-child(${i + 1})`);
-    if (datalist.cache[i]) {
-      e.textContent = e.value = datalist.cache[i];
-      e.disabled = false;
-    }
-    else {
-      e.disabled = true;
-    }
-  }
+  const parent = document.getElementById('history');
+  parent.textContent = '';
 
-  document.getElementById('datalist').disabled = datalist.cache.length === 0;
+  for (let i = 0; i < datalist.cache.length; i += 1) {
+    const option = document.createElement('option');
+    option.value = option.textContent = datalist.cache[i];
+
+    if (search.value === option.value) {
+      option.checked = true;
+    }
+    parent.appendChild(option);
+  }
+  parent.value = '';
 };
 datalist.activate = () => {
   datalist.available = prefs['datalist-enabled'] && tab && tab.url &&
     (tab.url.startsWith('http') || tab.url.startsWith('file'));
 
   if (datalist.available) {
-    const {hostname} = new URL(tab.url);
-    datalist.hostname = hostname;
+    const ckey = utils.ckey(prefs['history-mode'], tab.url);
 
-    const key = datalist.hostname + '-datalist';
     chrome.storage.local.get({
-      [key]: []
+      [ckey + '-' + 'datalist']: []
     }, prefs => {
-      datalist.cache = prefs[key];
+      datalist.cache = prefs[ckey + '-' + 'datalist'];
       datalist.update();
     });
   }
 };
-document.getElementById('datalist').onchange = e => {
-  const v = e.target.value;
-  if (v) {
-    search.value = v;
-    search.dispatchEvent(new Event('input'));
-    e.target.value = '';
+
+const updateStat = request => {
+  stat.total = 'total' in request ? request.total : stat.total;
+  if (stat.total) {
+    stat.textContent = ((request.offset || 0) + 1) + ' of ' + stat.total;
   }
+  else {
+    stat.textContent = '0/0';
+  }
+  backward.disabled = forward.disabled = [0, 1].indexOf(request.total) !== -1;
 };
 
-app.storage.get(prefs).then(async ps => {
+chrome.storage.local.get(prefs, async ps => {
   Object.assign(utils.prefs, ps);
 
   separator.value = prefs.separator;
 
   try {
-    tab = await app.tabs.current();
-    // only inject once
-    await utils.inject(tab.id);
+    [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true
+    });
 
-    const updateStat = request => {
-      stat.total = 'total' in request ? request.total : stat.total;
-      if (stat.total) {
-        stat.textContent = ((request.offset || 0) + 1) + ' of ' + stat.total;
-      }
-      else {
-        stat.textContent = '0/0';
-      }
-      backward.disabled = forward.disabled = [0, 1].indexOf(request.total) !== -1;
-    };
-
-    const o = (await app.tabs.inject.js(tab.id, {
-      files: ['/data/inject/control.js']
-    })).filter(o => o).shift();
+    const r = await utils.inject(tab, prefs);
 
     datalist.activate();
 
     const ckey = utils.ckey(prefs['history-mode'], tab.url);
 
-    const port = app.runtime.connect(tab.id, {
+    const port = chrome.tabs.connect(tab.id, {
       name: 'highlight'
     });
-    port.on('message', request => {
+
+    port.onMessage.addListener(request => {
       if (request.method === 'stat') {
         updateStat(request);
       }
@@ -106,9 +99,9 @@ app.storage.get(prefs).then(async ps => {
       }
     });
     const input = e => {
-      clearTimeout(input.id);
-      input.id = setTimeout(query => {
-        port.post({
+      window.clearTimeout(input.id);
+      input.id = window.setTimeout(query => {
+        port.postMessage({
           method: 'search',
           query,
           separator: separator.value,
@@ -145,15 +138,15 @@ app.storage.get(prefs).then(async ps => {
         forward.click();
       }
     });
-    separator.addEventListener('change', () => port.post({
-      method: 'reset',
+    separator.addEventListener('change', () => port.postMessage({
+      method: 'search',
       query: search.value,
       separator: separator.value,
       prefs
     }));
     backward.addEventListener('click', () => {
       datalist();
-      port.post({
+      port.postMessage({
         method: 'navigate',
         type: 'backward',
         prefs
@@ -161,7 +154,7 @@ app.storage.get(prefs).then(async ps => {
     });
     forward.addEventListener('click', () => {
       datalist();
-      port.post({
+      port.postMessage({
         method: 'navigate',
         type: 'forward',
         prefs
@@ -169,7 +162,7 @@ app.storage.get(prefs).then(async ps => {
     });
     document.getElementById('close').addEventListener('click', e => {
       if (e.shiftKey) {
-        port.post({
+        port.postMessage({
           method: 'persistent'
         });
       }
@@ -186,7 +179,7 @@ app.storage.get(prefs).then(async ps => {
         }
         else {
           if (e.shiftKey) {
-            port.post({
+            port.postMessage({
               method: 'persistent'
             });
             window.close();
@@ -198,22 +191,21 @@ app.storage.get(prefs).then(async ps => {
       }
     });
     // fill the search box
-    if (o && o.query) {
-      search.value = o.query || '';
-      updateStat(o);
+    if (r[0].result.query) {
+      search.value = r[0].result.query || '';
     }
     else {
       const v = prefs['history-cache'][ckey];
       if (v && prefs['history-enabled']) {
         search.value = v.query;
-        search.dispatchEvent(new Event('input'));
       }
     }
+    search.dispatchEvent(new Event('input'));
   }
   catch (e) {
-    console.warn(e);
-    search.title = search.value = 'Disabled on This Page; ' + e.message;
+    search.value = 'Disabled on This Page; ' + e.message;
     search.disabled = true;
+    console.warn(e);
   }
 });
 
@@ -231,7 +223,7 @@ search.addEventListener('input', e => {
 });
 
 // storage
-separator.addEventListener('change', e => app.storage.set({
+separator.addEventListener('change', e => chrome.storage.local.set({
   separator: e.target.value
 }));
 
@@ -240,3 +232,19 @@ document.addEventListener('DOMContentLoaded', () => {
   window.setTimeout(() => search.focus(), 0);
 });
 
+// history
+document.getElementById('history').addEventListener('change', e => {
+  search.value = e.target.value;
+  search.dispatchEvent(new Event('search'));
+  search.dispatchEvent(new Event('input'));
+});
+
+//
+if (!CSS.highlights) {
+  search.value = 'Please enable chrome://flags/#enable-experimental-web-platform-features';
+  search.disabled = true;
+
+  setTimeout(() => chrome.tabs.create({
+    url: 'chrome://flags/#enable-experimental-web-platform-features'
+  }), 3000);
+}

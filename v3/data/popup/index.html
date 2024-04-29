@@ -5,22 +5,18 @@
   <meta charset="utf-8">
 </head>
 <body>
-  <div id="form" title="Search Document (r: regexp)
-
-Prss Enter to find the next match
-Press Shift + Enter to find the previous match
-Press Enter or Shift + Enter to add a query to the history list for this domain">
+  <div id="form" title="Search Document (r: regexp, h: highlight, u: underline, b: bold)">
     <div id="tools">
       <span id="stat">...</span>
       <label>
         Split by
         <select id="separator" title="Split the query into sub-queries:
 
-[ ]: Use space as the separator
-[,]: Use comma as the separator
-[;]: Use semicolon as the separator
-[|]: Use semicolon as the separator
-[n]: Do not use any separator">
+    [ ]: Use space as the separator
+    [,]: Use comma as the separator
+    [;]: Use semicolon as the separator
+    [|]: Use vertical bar as the separator
+    [n]: Do not use any separator">
           <option value=" ">[ ]</option>
           <option value=",">[,]</option>
           <option value=";">[;]</option>
@@ -34,13 +30,23 @@ Press Enter or Shift + Enter to add a query to the history list for this domain"
   Press [Shift] + [ESC] to close without removing highlights
   Press [Shift] key while clicking on this button to close without removing highlights">
     </div>
-
     <div id="search-container">
-      <input type="search" id="search" autocomplete="off" autofocus placeholder="Search Document (r: regexp)">
-      <select id="history" title="Press Enter or Shift + Enter to add a query to the history list for this domain"></select>
+      <input type="search" id="search" autocomplete="off" autofocus placeholder="Search Document (r: regexp, h: highlight, u: underline, b: bold)">
+      <select id="datalist">
+        <option disabled>
+        <option disabled>
+        <option disabled>
+        <option disabled>
+        <option disabled>
+        <option disabled>
+        <option disabled>
+        <option disabled>
+      </select>
     </div>
+
   </div id="form">
 
+  <script type="text/javascript" src="/app.js/base.js"></script>
   <script type="text/javascript" src="utils.js"></script>
   <script type="text/javascript" src="index.js"></script>
 </body>

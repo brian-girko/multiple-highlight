@@ -6,111 +6,118 @@
   <link rel="stylesheet" type="text/css" href="index.css">
 </head>
 <body>
-  <table width="100%">
-    <colgroup>
-      <col width="32">
-      <col>
-    </colgroup>
-    <tbody>
-      <tr>
-        <td><input type="checkbox" id="persistent"></td>
-        <td><label for="persistent"> Keep highlights <a data-href="faq5" target="_blank">when closing</a> the popup<sup>1</sup></label></td>
-      </tr>
-      <tr>
-        <td><input type="checkbox" id="close-on-esc"></td>
-        <td><label for="close-on-esc"> Close the popup window when ESC is pressed<sup>2</sup></label></td>
-      </tr>
-      <tr>
-        <td><input type="checkbox" id="clean-on-esc"></td>
-        <td><label for="clean-on-esc"> Clean the search box when ESC is pressed<sup>2</sup></label></td>
-      </tr>
-      <tr>
-        <td><input type="checkbox" id="history-enabled"></td>
-        <td><label for="history-enabled"> Save the query for <select id="history-mode">
-          <option value="url">the current URL</option>
-          <option value="hostname">the current hostname</option>
-          <option value="global">any website</option>
-        </select> and automatically perform the search when the popup is opened</label></td>
-      </tr>
-      <tr>
-        <td><input type="checkbox" id="datalist-enabled"></td>
-        <td><label for="datalist-enabled"> If navigation is pressed, save the query for the current hostname (e.g.: www.google.com) and offer an autocompleting list of the previous queries for the same hostname</label></td>
-      </tr>
-    </tbody>
-  </table>
-  <div class="colors">
-    <span></span>
-    <span>Front</span>
-    <span>Background</span>
-
-    <div data-id="a">
-      <span>Mark 1</span>
-      <input type="color">
-      <input type="color">
-    </div>
-
-    <div data-id="b">
-      <span>Mark 2</span>
-      <input type="color">
-      <input type="color">
-    </div>
-
-    <div data-id="c">
-      <span>Mark 3</span>
-      <input type="color">
-      <input type="color">
-    </div>
-
-    <div data-id="d">
-      <span>Mark 4</span>
-      <input type="color">
-      <input type="color">
-    </div>
-
-    <div data-id="e">
-      <span>Mark 5</span>
-      <input type="color">
-      <input type="color">
-    </div>
-
-    <div data-id="f">
-      <span>Mark 6</span>
-      <input type="color">
-      <input type="color">
-    </div>
-
-    <div data-id="g">
-      <span>Mark 7</span>
-      <input type="color">
-      <input type="color">
-    </div>
-
-    <div data-id="h">
-      <span>Mark 8</span>
-      <input type="color">
-      <input type="color">
-    </div>
-
-    <div data-id="i">
-      <span>Mark 9</span>
-      <input type="color">
-      <input type="color">
-    </div>
-
-    <div data-id="j">
-      <span>Mark 10</span>
-      <input type="color">
-      <input type="color">
-    </div>
-
-    <div data-id="_">
-      <span>Active Mark</span>
-      <input type="color">
-      <input type="color">
-    </div>
+  <div class="type1">
+    <label for="engine">Highlighting Engine</label>
+    <select id="engine">
+      <option value="mark.es6.js">Mark JS</option>
+      <option value="tbdm.es6.js" disabled>TBDM JS</option>
+    </select>
+    <label for="persistent">Keep highlights when closing the popup<sup>1</sup></label>
+    <input type="checkbox" id="persistent">
+    <label for="close-on-esc">Close the popup window upon pressing the ESC key<sup>2</sup></label>
+    <input type="checkbox" id="close-on-esc">
+    <label for="clean-on-esc">Clear the search box upon pressing the ESC key<sup>2</sup></label>
+    <input type="checkbox" id="clean-on-esc">
+    <label for="history-enabled">Save the query for <select id="history-mode">
+      <option value="url">the current URL</option>
+      <option value="hostname">the current hostname</option>
+      <option value="global">any website</option>
+    </select> and automatically start searching when the popup is opened</label>
+    <input type="checkbox" id="history-enabled">
+    <label for="datalist-enabled">When navigating, store the query for the current hostname (e.g., www.google.com) and provide an autocomplete list of previous queries for that hostname.</label>
+    <input type="checkbox" id="datalist-enabled">
+    <label for="no-active-rule">Do not style active mark; I will handle it in the custom style section. (Refreshing the page is necessary)</label>
+    <input type="checkbox" id="no-active-rule">
   </div>
 
-  <div id="explore"></div>
+  <table width="100%" class="colors">
+    <colgroup>
+      <col>
+      <col width="60px">
+      <col width="60px">
+      <col width="60px">
+    </colgroup>
+    <tr>
+      <td></td>
+      <td>Front</td>
+      <td>Back</td>
+      <td>Box</td>
+    </tr>
+    <tr id="a">
+      <td>Mark 1</td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+    </tr>
+    <tr id="b">
+      <td>Mark 2</td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+    </tr>
+    <tr id="c">
+      <td>Mark 3</td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+    </tr>
+    <tr id="d">
+      <td>Mark 4</td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+    </tr>
+    <tr id="e">
+      <td>Mark 5</td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+    </tr>
+    <tr id="f">
+      <td>Mark 6</td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+    </tr>
+    <tr id="g">
+      <td>Mark 7</td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+    </tr>
+    <tr id="h">
+      <td>Mark 8</td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+    </tr>
+    <tr id="i">
+      <td>Mark 9</td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+    </tr>
+    <tr id="j">
+      <td>Mark 10</td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+    </tr>
+    <tr id="_">
+      <td>Active Mark</td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+      <td><input type="color"></td>
+    </tr>
+  </table>
+
+  <p>
+    <textarea id="custom-css" rows=6 placeholder="Custom CSS rules to overwrite default ones.
+
+To match active marker use 'mark[data-markjs=&quot;true&quot;][data-active=&quot;true&quot;]'
+To match the first marker use '.mark00'"></textarea>
+  </p>
+
 
   <p>
     <input type="button" id="support" value="Support Development">
@@ -122,9 +129,7 @@
     <li>To keep highlights when closing the popup and use ESC key to close the popup window, you need to uncheck "Clean the search box when ESC is pressed" option.</li>
     <li>This option may not work correctly on Firefox browser</li>
   </ol>
-
-  <script type="text/javascript" src="../popup/utils.js"></script>
+  <script type="text/javascript" src="/app.js/base.js"></script>
   <script type="text/javascript" src="index.js"></script>
-  <script type="text/javascript" async src="matched.js"></script>
 </body>
 </html>

@@ -22,6 +22,7 @@ class CNFind extends Find {
     const ranges = this.ranges;
 
     if (ranges.length === 0) {
+      proceed(undefined, false);
       return;
     }
     // remove old one
@@ -42,6 +43,7 @@ class CNFind extends Find {
       cursor = (cursor + ranges.length) % ranges.length;
     }
     const e = ranges[cursor];
+
     if (e) {
       const found = this.stats.cursor === -1 || (step > 0 ? cursor !== 0 : cursor !== ranges.length - 1);
 
@@ -59,9 +61,9 @@ class CNFind extends Find {
         }));
       });
     }
-  }
-  navigate(step) {
-    this.#navigate(step);
+    else {
+      proceed(undefined, false);
+    }
   }
   previous(proceed = undefined) {
     this.#navigate(-1, proceed);

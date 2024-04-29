@@ -1,38 +1,70 @@
-/* global utils */
+/* global app */
 'use strict';
 
 const toast = document.getElementById('toast');
 
-const prefs = utils.prefs;
+const prefs = {
+  'engine': 'mark.es6.js',
+  'persistent': false,
+  'clean-on-esc': true,
+  'close-on-esc': true,
+  'datalist-enabled': true,
+  'history-enabled': true,
+  'history-mode': 'url',
+  'no-active-rule': false,
+  'colors': {
+    'a': ['#666666', '#ffff00', '#ffff00'],
+    'b': ['#666666', '#ffc501', '#ffc501'],
+    'c': ['#666666', '#b5fa01', '#b5fa01'],
+    'd': ['#49186d', '#fd13f0', '#fd13f0'],
+    'e': ['#666666', '#fff5cc', '#fff5cc'],
+    'f': ['#5d0100', '#ffa0a0', '#ffa0a0'],
+    'g': ['#666666', '#dae0ff', '#dae0ff'],
+    'h': ['#49186d', '#edd3ff', '#edd3ff'],
+    'i': ['#5d0100', '#b8dbec', '#b8dbec'],
+    'j': ['#ffeef7', '#34222c', '#34222c'],
+    '_': ['#303b49', '#abd1ff', '#96bbe8']
+  },
+  'custom-css': ''
+};
 
-chrome.storage.local.get(prefs, ps => {
-  Object.assign(prefs, ps);
-
+app.storage.get(prefs).then(prefs => {
+  // document.getElementById('engine').value = prefs.engine;
+  document.getElementById('engine').value = 'mark.es6.js';
   document.getElementById('persistent').checked = prefs.persistent;
   document.getElementById('clean-on-esc').checked = prefs['clean-on-esc'];
   document.getElementById('close-on-esc').checked = prefs['close-on-esc'];
   document.getElementById('datalist-enabled').checked = prefs['datalist-enabled'];
   document.getElementById('history-enabled').checked = prefs['history-enabled'];
   document.getElementById('history-mode').value = prefs['history-mode'];
-  for (const [key, [c, b]] of Object.entries(prefs.colors)) {
-    const parent = document.querySelector(`[data-id="${key}"]`);
-    parent.children[1].value = c;
-    parent.children[2].value = b;
+  document.getElementById('no-active-rule').checked = prefs['no-active-rule'];
+  for (const [key, [c, b, s]] of Object.entries(prefs.colors)) {
+    document.querySelector(`#${key} td:nth-child(2) input`).value = c;
+    document.querySelector(`#${key} td:nth-child(3) input`).value = b;
+    document.querySelector(`#${key} td:nth-child(4) input`).value = s;
   }
+  document.getElementById('custom-css').value = prefs['custom-css'];
 });
 
-document.getElementById('save').addEventListener('click', () => chrome.storage.local.set({
+document.getElementById('save').addEventListener('click', () => app.storage.set({
+  'engine': document.getElementById('engine').value,
   'persistent': document.getElementById('persistent').checked,
   'clean-on-esc': document.getElementById('clean-on-esc').checked,
   'close-on-esc': document.getElementById('close-on-esc').checked,
   'datalist-enabled': document.getElementById('datalist-enabled').checked,
   'history-enabled': document.getElementById('history-enabled').checked,
   'history-mode': document.getElementById('history-mode').value,
-  'colors': [...document.querySelectorAll('[data-id]')].reduce((p, e) => {
-    p[e.dataset.id] = [e.children[1].value, e.children[2].value];
+  'no-active-rule': document.getElementById('no-active-rule').checked,
+  'colors': Object.keys(prefs.colors).reduce((p, key) => {
+    p[key] = [
+      document.querySelector(`#${key} td:nth-child(2) input`).value,
+      document.querySelector(`#${key} td:nth-child(3) input`).value,
+      document.querySelector(`#${key} td:nth-child(4) input`).value
+    ];
     return p;
-  }, {})
-}, () => {
+  }, {}),
+  'custom-css': document.getElementById('custom-css').value
+}).then(() => {
   if (document.getElementById('datalist-enabled').checked === false) {
     chrome.storage.local.get(null, prefs => {
       const keys = Object.keys(prefs).filter(s => s.endsWith('-datalist'));
@@ -62,10 +94,3 @@ document.getElementById('reset').addEventListener('click', e => {
 document.getElementById('support').addEventListener('click', () => chrome.tabs.create({
   url: chrome.runtime.getManifest().homepage_url + '?rd=donate'
 }));
-
-// links
-for (const a of [...document.querySelectorAll('[data-href]')]) {
-  if (a.hasAttribute('href') === false) {
-    a.href = chrome.runtime.getManifest().homepage_url + '#' + a.dataset.href;
-  }
-}
