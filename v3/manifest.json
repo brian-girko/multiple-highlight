@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "0.4.5",
+  "version": "0.5.0",
   "name": "Multiple Search and Highlight",
   "description": "Highlight multiple words separated by comma, space or arbitrary separator with persistent history",
   "permissions": [
@@ -10,7 +10,11 @@
    ],
   "homepage_url": "https://add0n.com/multiple-highlight.html",
    "background": {
-    "service_worker": "worker.js"
+    "service_worker": "worker.js",
+    "scripts": [
+      "/data/popup/utils.js",
+      "worker.js"
+    ]
   },
   "action": {
     "default_popup": "/data/popup/index.html"
@@ -36,5 +40,11 @@
   "options_ui": {
     "page": "/data/options/index.html",
     "open_in_tab": true
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{f704468d-9a97-4e40-b573-2707a8248e1f}",
+      "strict_min_version": "128.0"
+    }
   }
 }

@@ -1,4 +1,3 @@
-/* global app */
 'use strict';
 
 const toast = document.getElementById('toast');
@@ -28,9 +27,8 @@ const prefs = {
   'custom-css': ''
 };
 
-app.storage.get(prefs).then(prefs => {
-  // document.getElementById('engine').value = prefs.engine;
-  document.getElementById('engine').value = 'mark.es6.js';
+chrome.storage.local.get(prefs).then(prefs => {
+  document.getElementById('engine').value = prefs.engine;
   document.getElementById('persistent').checked = prefs.persistent;
   document.getElementById('clean-on-esc').checked = prefs['clean-on-esc'];
   document.getElementById('close-on-esc').checked = prefs['close-on-esc'];
@@ -46,7 +44,7 @@ app.storage.get(prefs).then(prefs => {
   document.getElementById('custom-css').value = prefs['custom-css'];
 });
 
-document.getElementById('save').addEventListener('click', () => app.storage.set({
+document.getElementById('save').addEventListener('click', () => chrome.storage.local.set({
   'engine': document.getElementById('engine').value,
   'persistent': document.getElementById('persistent').checked,
   'clean-on-esc': document.getElementById('clean-on-esc').checked,

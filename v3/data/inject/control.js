@@ -1,4 +1,4 @@
-/* globals Mark */
+/* global Mark */
 'use strict';
 {
   const inViewport = e => {
@@ -255,4 +255,6 @@
   query: window.query,
   total: window.total,
   offset: window.offset
-}) // send the current query to the popup
+// send the current query to the popup
+// eslint-disable-next-line semi
+})

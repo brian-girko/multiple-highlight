@@ -1,4 +1,4 @@
-/* global app, utils */
+/* global utils */
 const search = document.getElementById('search');
 const separator = document.getElementById('separator');
 const stat = document.getElementById('stat');
@@ -28,15 +28,13 @@ datalist.update = () => {
   for (let i = 0; i < 8; i += 1) {
     const e = document.querySelector(`#datalist option:nth-child(${i + 1})`);
     if (datalist.cache[i]) {
-      e.textContent = e.value = datalist.cache[i];
+      e.value = datalist.cache[i];
       e.disabled = false;
     }
     else {
       e.disabled = true;
     }
   }
-
-  document.getElementById('datalist').disabled = datalist.cache.length === 0;
 };
 datalist.activate = () => {
   datalist.available = prefs['datalist-enabled'] && tab && tab.url &&
@@ -55,22 +53,18 @@ datalist.activate = () => {
     });
   }
 };
-document.getElementById('datalist').onchange = e => {
-  const v = e.target.value;
-  if (v) {
-    search.value = v;
-    search.dispatchEvent(new Event('input'));
-    e.target.value = '';
-  }
-};
 
-app.storage.get(prefs).then(async ps => {
+chrome.storage.local.get(prefs).then(async ps => {
   Object.assign(utils.prefs, ps);
 
   separator.value = prefs.separator;
 
   try {
-    tab = await app.tabs.current();
+    [tab] = await chrome.tabs.query({
+      active: true,
+      lastFocusedWindow: true
+    });
+
     // only inject once
     await utils.inject(tab.id);
 
@@ -85,18 +79,23 @@ app.storage.get(prefs).then(async ps => {
       backward.disabled = forward.disabled = [0, 1].indexOf(request.total) !== -1;
     };
 
-    const o = (await app.tabs.inject.js(tab.id, {
+    const r = await chrome.scripting.executeScript({
+      target: {
+        tabId: tab.id
+      },
+      injectImmediately: true,
       files: ['/data/inject/control.js']
-    })).filter(o => o).shift();
+    });
+    const o = r[0].result;
 
     datalist.activate();
 
     const ckey = utils.ckey(prefs['history-mode'], tab.url);
 
-    const port = app.runtime.connect(tab.id, {
+    const port = chrome.tabs.connect(tab.id, {
       name: 'highlight'
     });
-    port.on('message', request => {
+    port.onMessage.addListener(request => {
       if (request.method === 'stat') {
         updateStat(request);
       }
@@ -108,7 +107,7 @@ app.storage.get(prefs).then(async ps => {
     const input = e => {
       clearTimeout(input.id);
       input.id = setTimeout(query => {
-        port.post({
+        port.postMessage({
           method: 'search',
           query,
           separator: separator.value,
@@ -145,7 +144,7 @@ app.storage.get(prefs).then(async ps => {
         forward.click();
       }
     });
-    separator.addEventListener('change', () => port.post({
+    separator.addEventListener('change', () => port.postMessage({
       method: 'reset',
       query: search.value,
       separator: separator.value,
@@ -153,7 +152,7 @@ app.storage.get(prefs).then(async ps => {
     }));
     backward.addEventListener('click', () => {
       datalist();
-      port.post({
+      port.postMessage({
         method: 'navigate',
         type: 'backward',
         prefs
@@ -161,7 +160,7 @@ app.storage.get(prefs).then(async ps => {
     });
     forward.addEventListener('click', () => {
       datalist();
-      port.post({
+      port.postMessage({
         method: 'navigate',
         type: 'forward',
         prefs
@@ -169,7 +168,7 @@ app.storage.get(prefs).then(async ps => {
     });
     document.getElementById('close').addEventListener('click', e => {
       if (e.shiftKey) {
-        port.post({
+        port.postMessage({
           method: 'persistent'
         });
       }
@@ -186,7 +185,7 @@ app.storage.get(prefs).then(async ps => {
         }
         else {
           if (e.shiftKey) {
-            port.post({
+            port.postMessage({
               method: 'persistent'
             });
             window.close();
@@ -211,8 +210,7 @@ app.storage.get(prefs).then(async ps => {
     }
   }
   catch (e) {
-    console.warn(e);
-    search.title = search.value = 'Disabled on This Page; ' + e.message;
+    search.value = 'Disabled on This Page: ' + e.message;
     search.disabled = true;
   }
 });
@@ -231,12 +229,11 @@ search.addEventListener('input', e => {
 });
 
 // storage
-separator.addEventListener('change', e => app.storage.set({
+separator.addEventListener('change', e => chrome.storage.local.set({
   separator: e.target.value
 }));
 
 // auto focus
 document.addEventListener('DOMContentLoaded', () => {
-  window.setTimeout(() => search.focus(), 0);
+  setTimeout(() => search.focus(), 0);
 });
-

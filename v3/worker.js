@@ -1,7 +1,8 @@
-/* global utils, app */
-'use strict';
+/* global utils */
 
-self.importScripts('app.js/base.js', 'data/popup/utils.js');
+if (typeof importScripts !== 'undefined') {
+  self.importScripts('/data/popup/utils.js');
+}
 
 // delete history when it is disabled
 chrome.storage.onChanged.addListener(prefs => {
@@ -13,66 +14,70 @@ chrome.storage.onChanged.addListener(prefs => {
 });
 
 //
-chrome.commands.onCommand.addListener(command => {
+chrome.commands.onCommand.addListener(async command => {
   if (command === 'ckey_highlight') {
-    chrome.tabs.query({
+    const tabs = await chrome.tabs.query({
       active: true,
-      currentWindow: true
-    }, tabs => {
-      if (tabs.length) {
-        const tab = tabs[0];
-        chrome.storage.local.get(utils.prefs, prefs => {
-          const ckey = utils.ckey(prefs['history-mode'], tab.url);
+      lastFocusedWindow: true
+    });
+    if (tabs.length) {
+      const tab = tabs[0];
+      const prefs = await chrome.storage.local.get(utils.prefs);
+      const ckey = utils.ckey(prefs['history-mode'], tab.url);
 
-          const v = prefs['history-cache'][ckey];
-          if (v && prefs['history-enabled']) {
-            utils.inject(tab.id, prefs.colors).then(async () => {
-              await app.tabs.inject.js(tab.id, {
-                files: ['/data/inject/control.js']
-              });
-              const port = app.runtime.connect(tab.id, {
-                name: 'highlight'
-              });
-              port.post({
-                method: 'search',
-                query: v.query,
-                separator: prefs.separator,
-                prefs,
-                origin: 'background'
-              });
-            });
-          }
+      const v = prefs['history-cache'][ckey];
+      if (v && prefs['history-enabled']) {
+        await utils.inject(tab.id);
+        await chrome.scripting.executeScript({
+          target: {
+            tabId: tab.id
+          },
+          injectImmediately: true,
+          files: ['/data/inject/control.js']
+        });
+
+        const port = chrome.tabs.connect(tab.id, {
+          name: 'highlight'
+        });
+        port.postMessage({
+          method: 'search',
+          query: v.query,
+          separator: prefs.separator,
+          prefs,
+          origin: 'background'
         });
       }
-    });
+    }
   }
   else if (command === 'remove_highlight') {
-    chrome.tabs.query({
+    const tabs = await chrome.tabs.query({
       active: true,
-      currentWindow: true
-    }, tabs => {
-      if (tabs.length) {
-        const tab = tabs[0];
-
-        chrome.storage.local.get(utils.prefs, prefs => {
-          utils.inject(prefs.colors).then(() => {
-            app.tabs.inject.js(tab.id, {
-              files: ['/data/inject/mark.es6.js']
-            }).then(() => app.tabs.inject.js(tab.id, {
-              func: () => {
-                /* global Mark */
-                const instance = new Mark(document.body);
-                delete window.cache;
-                delete window.query;
-                delete window.offset;
-                delete window.total;
-                instance.unmark();
-              }
-            }));
-          });
-        });
-      }
+      lastFocusedWindow: true
     });
+    if (tabs.length) {
+      const [tab] = tabs;
+      await chrome.scripting.executeScript({
+        target: {
+          tabId: tab.id
+        },
+        injectImmediately: true,
+        files: ['/data/inject/mark.es6.js']
+      });
+      await chrome.scripting.executeScript({
+        target: {
+          tabId: tab.id
+        },
+        func: () => {
+          /* global Mark */
+          const instance = new Mark(document.body);
+          delete window.cache;
+          delete window.query;
+          delete window.offset;
+          delete window.total;
+          instance.unmark();
+        }
+      });
+    }
   }
 });
 
@@ -80,8 +85,7 @@ chrome.commands.onCommand.addListener(command => {
 {
   const {management, runtime: {onInstalled, setUninstallURL, getManifest}, storage, tabs} = chrome;
   if (navigator.webdriver !== true) {
-    const page = getManifest().homepage_url;
-    const {name, version} = getManifest();
+    const {homepage_url: page, name, version} = getManifest();
     onInstalled.addListener(({reason, previousVersion}) => {
       management.getSelf(({installType}) => installType === 'normal' && storage.local.get({
         'faqs': true,
@@ -90,7 +94,7 @@ chrome.commands.onCommand.addListener(command => {
         if (reason === 'install' || (prefs.faqs && reason === 'update')) {
           const doUpdate = (Date.now() - prefs['last-update']) / 1000 / 60 / 60 / 24 > 45;
           if (doUpdate && previousVersion !== version) {
-            tabs.query({active: true, currentWindow: true}, tbs => tabs.create({
+            tabs.query({active: true, lastFocusedWindow: true}, tbs => tabs.create({
               url: page + '?version=' + version + (previousVersion ? '&p=' + previousVersion : '') + '&type=' + reason,
               active: reason === 'install',
               ...(tbs && tbs.length && {index: tbs[0].index + 1})

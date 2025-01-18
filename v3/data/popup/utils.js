@@ -1,4 +1,3 @@
-/* global app */
 'use strict';
 
 const utils = {
@@ -37,9 +36,16 @@ const utils = {
     'no-active-rule': false
   },
   async once(tabId) {
-    return (await app.tabs.inject.js(tabId, {
+    const r = await chrome.scripting.executeScript({
+      target: {
+        tabId
+      },
       func: () => typeof Mark
-    })).filter(o => o).shift() === 'undefined';
+    });
+    if (r[0] === undefined) { // Firefox
+      throw Error('Cannot Access This Tab');
+    }
+    return r[0].result === 'undefined';
   },
   async prepare(tabId) {
     const {colors} = utils.prefs;
@@ -121,37 +127,36 @@ const utils = {
       }`;
     }
     code += utils.prefs['custom-css'];
-
-    utils.prefs.engine = 'mark.es6.js'; // force markjs for now
     if (utils.prefs.engine === 'mark.es6.js') {
-      await Promise.all([
-        app.tabs.inject.js(tabId, {
-          files: ['/data/inject/mark.es6.js']
-        }),
-        app.tabs.inject.css(tabId, {
-          css: code
-        })
-      ]);
+      await chrome.scripting.executeScript({
+        target: {
+          tabId
+        },
+        injectImmediately: true,
+        files: ['/data/inject/mark.es6.js']
+      });
     }
     else {
-      await Promise.all([
-        app.tabs.inject.js(tabId, {
-          files: ['/data/inject/tbdm/tbdm.js']
-        }).then(() => app.tabs.inject.js(tabId, {
-          files: ['/data/inject/tbdm.es6.js']
-        })),
-        app.tabs.inject.css({
-          css: code
-        })
-      ]);
+      await chrome.scripting.executeScript({
+        target: {
+          tabId
+        },
+        injectImmediately: true,
+        files: ['/data/inject/tbdm/tbdm.js', '/data/inject/tbdm.es6.js']
+      });
     }
+    await chrome.scripting.insertCSS({
+      target: {
+        tabId
+      },
+      css: code
+    });
   }
 };
-utils.inject = async (tabId, colors) => {
+utils.inject = async tabId => {
   if (await utils.once(tabId)) {
-    return await utils.prepare(tabId, colors);
+    return await utils.prepare(tabId);
   }
-  return Promise.resolve();
 };
 
 utils.ckey = (mode, url) => {
