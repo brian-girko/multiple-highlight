@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="index.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <div id="form" title="Search Document (r: regexp, h: highlight, u: underline, b: bold)">
+    <div id="tools">
+      <span id="stat">...</span>
+      <label>
+        Split by
+        <select id="separator" title="Split the query into sub-queries:
+
+    [ ]: Use space as the separator
+    [,]: Use comma as the separator
+    [;]: Use semicolon as the separator
+    [|]: Use vertical bar as the separator
+    [n]: Do not use any separator">
+          <option value=" ">[ ]</option>
+          <option value=",">[,]</option>
+          <option value=";">[;]</option>
+          <option value="|">[|]</option>
+          <option value="false">[n]</option>
+        </select>
+      </label>
+      <input type="button" id="backward" title="Press [Shift + Enter]" disabled="true">
+      <input type="button" id="forward" title="Press [Enter]" disabled="true">
+      <input type="button" id="close" title="Press [ESC] to close
+  Press [Shift] + [ESC] to close without removing highlights
+  Press [Shift] key while clicking on this button to close without removing highlights">
+    </div>
+    <datalist id="datalist">
+      <option disabled>
+      <option disabled>
+      <option disabled>
+      <option disabled>
+      <option disabled>
+      <option disabled>
+      <option disabled>
+      <option disabled>
+    </datalist>
+
+
+    <input type="search" id="search" autocomplete="off" autofocus placeholder="Search Document (r: regexp, h: highlight)" list="datalist">
+  </div id="form">
+
+  <script type="text/javascript" src="utils.js"></script>
+  <script type="text/javascript" src="index.js"></script>
+</body>
+</html>

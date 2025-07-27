@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="index.css">
+</head>
+<body>
+  <div>
+    <h1>Part 1</h1>
+    <style>body {}</style>
+    <div style="display: none;">This is          hidden</div>
+    <div>  <span> Starting! </span>      this is      a     nice          book.  </div>
+  </div>
+
+  <div style="position: relative;">
+    <h1>Part 2</h1>
+    <p style="margin-block-start: 100px;">
+      <pre>1. This is a  nice book.     </pre>
+      <div>2. This is a  nice  book.<br>          Nice          </div>
+    </p>
+    <div style="position: absolute; top: 0; right: 0; border: solid;">3. This is a nice  book.<br>           Nice</div>
+  </div>
+
+  <div>
+    <h1>Part 3</h1>
+    <div style="display: none;">
+      <div>DDD</div>
+    </div>
+
+    <div><span>     Nice           Bo</span><span>ok                     </span></div>
+    <div>Nice Book</div>
+    <div>Nice Book. Nice Book. Nice Book. Nice Book</div>
+  </div>
+
+  <script src="code/VisibleTextNodeWalker.js"></script>
+  <script src="code/search.js"></script>
+  <script src="code/range.js"></script>
+  <script src="index.js"></script>
+</body>
+</html>
