@@ -211,6 +211,7 @@ chrome.storage.local.get(prefs).then(async ps => {
     }
   }
   catch (e) {
+    console.error(e);
     search.value = 'Disabled on This Page: ' + e.message;
     search.disabled = true;
   }

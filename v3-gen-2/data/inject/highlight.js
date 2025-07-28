@@ -17,7 +17,7 @@
       }
       // exactly matched node
       if (/\s/.test(nodeValue[0]) === false) {
-        if (nodeValue === content.slice(index + 1, index + nodeValue.length + 1)) {
+        if (nodeValue.toLowerCase() === content.slice(index + 1, index + nodeValue.length + 1).toLowerCase()) {
           return [index + 1, index + nodeValue.length + 1];
         }
       }
@@ -27,14 +27,35 @@
       let s = null; // first none-space index in of nodeValue in content
 
       for (; index < content.length && i < signature.length; index++) {
-        const char = content[index];
+        //  if index is the start of a full character
+        const code = content.charCodeAt(index);
+        if (code >= 0xDC00 && code <= 0xDFFF) {
+          continue;
+        }
+
+        const char = String.fromCodePoint(content.codePointAt(index));
+
         if (/\s/.test(char)) {
           continue;
         }
         s = s ?? index;
-        // e.g.: text-transform: uppercase;
         if (char.toLowerCase() !== signature[i].toLowerCase()) {
-          throw Error('MISMATCHED');
+          const code = char.codePointAt(0);
+          // Math italic small letters: U+1D44E to U+1D467 maps to a-z
+          if (code >= 0x1D44E && code <= 0x1D467) {
+            if (String.fromCharCode(0x61 + (code - 0x1D44E)) !== signature[i]) {
+              throw Error('MISMATCHED_1');
+            }
+          }
+          // Math italic capital letters: U+1D434 to U+1D44D maps to A-Z
+          else if (code >= 0x1D434 && code <= 0x1D44D) {
+            if (String.fromCharCode(0x41 + (code - 0x1D434)) !== signature[i]) {
+              throw Error('MISMATCHED_2');
+            }
+          }
+          else {
+            throw Error('MISMATCHED_3');
+          }
         }
         i += 1;
       }
@@ -67,7 +88,9 @@
             }
           }
           // Skip invisible or mismatched nodes
-          catch (e) {}
+          catch (e) {
+            console.log('[hidden]', value);
+          }
         }
       }
       return null;
@@ -203,3 +226,6 @@
   self.range = range;
   self.search = search;
 }
+
+// eslint-disable-next-line semi
+''

@@ -7,7 +7,9 @@ const walker = new VisibleTextNodeWalker(document.body, {
 
 console.time('one');
 let n = 0;
-while (walker.nextNode()) {
+let walk;
+while (walk = walker.nextNode()) {
+  console.log('[node]', walk.value);
   n += 1;
 }
 console.timeEnd('one');

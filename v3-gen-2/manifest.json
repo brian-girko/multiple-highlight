@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "0.5.0",
+  "version": "0.6.0",
   "name": "Multiple Search and Highlight",
   "description": "Highlight multiple words separated by comma, space or arbitrary separator with persistent history",
   "permissions": [
@@ -8,25 +8,25 @@
     "activeTab",
     "scripting"
    ],
-  "homepage_url": "https://add0n.com/multiple-highlight.html",
+  "homepage_url": "https://webextension.org/listing/multiple-highlight.html",
    "background": {
     "service_worker": "worker.js",
     "scripts": [
-      "/data/popup/utils.js",
+      "data/popup/utils.js",
       "worker.js"
     ]
   },
   "action": {
-    "default_popup": "/data/popup/index.html"
+    "default_popup": "data/popup/index.html"
   },
   "offline_enabled": true,
   "icons": {
-    "512": "/data/icons/512.png",
-    "256": "/data/icons/256.png",
-    "128": "/data/icons/128.png",
-    "64": "/data/icons/64.png",
-    "32": "/data/icons/32.png",
-    "16": "/data/icons/16.png"
+    "512": "data/icons/512.png",
+    "256": "data/icons/256.png",
+    "128": "data/icons/128.png",
+    "64": "data/icons/64.png",
+    "32": "data/icons/32.png",
+    "16": "data/icons/16.png"
   },
   "commands": {
     "_execute_action": {},
@@ -38,7 +38,7 @@
     }
   },
   "options_ui": {
-    "page": "/data/options/index.html",
+    "page": "data/options/index.html",
     "open_in_tab": true
   },
   "browser_specific_settings": {
