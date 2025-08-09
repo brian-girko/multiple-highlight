@@ -105,6 +105,12 @@ chrome.storage.local.get(prefs).then(async ps => {
         search.title = request.clean;
       }
     });
+    if (prefs.persistent) {
+      port.postMessage({
+        method: 'persistent'
+      });
+    }
+
     const input = e => {
       clearTimeout(input.id);
       input.id = setTimeout(query => {
