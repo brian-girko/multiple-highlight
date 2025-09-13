@@ -8,11 +8,35 @@
 
   const scrollRangeIntoViewIfNeeded = (range, prefs) => {
     const rect = range.getBoundingClientRect();
+    // find the top offset of the document that this range belongs to
+    let offset = 0;
+    try {
+      let win = range.startContainer.ownerDocument?.defaultView || window;
+      while (win && win !== win.parent) {
+        const parentDoc = win.parent.document;
+        const iframes = parentDoc.querySelectorAll('frame,iframe');
+
+        let found = false;
+        for (let i = 0; i < iframes.length; i++) {
+          const iframe = iframes[i];
+          if (iframe.contentWindow === win) {
+            const rect = iframe.getBoundingClientRect();
+            offset += rect.top;
+            win = win.parent;
+            found = true;
+            break;
+          }
+        }
+        if (!found) break; // shouldn't happen if doc belongs to an iframe
+      }
+    }
+    catch (e) {}
+
     const isInViewport = (
-      rect.top >= 0 &&
-      rect.left >= 0 &&
-      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+      rect.top + offset >= 0 &&
+      rect.left + offset >= 0 &&
+      rect.bottom + offset <= (window.innerHeight || document.documentElement.clientHeight) &&
+      rect.right + offset <= (window.innerWidth || document.documentElement.clientWidth)
     );
 
     if (!isInViewport) {
@@ -89,7 +113,7 @@
       const highlights = new Map();
       for (const ch of ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']) {
         const highlight = new Highlight();
-        CSS.highlights.set('type-' + ch, highlight);
+        doc.defaultView.CSS.highlights.set('type-' + ch, highlight);
 
         highlights.set(ch, highlight);
       }
