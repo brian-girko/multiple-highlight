@@ -89,7 +89,7 @@
           }
           // Skip invisible or mismatched nodes
           catch (e) {
-            console.log('[hidden]', value);
+            // console.log('[hidden]', value);
           }
         }
       }

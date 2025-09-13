@@ -1,24 +1,40 @@
 /* global search, range, Highlight */
 
-const highlight = new Highlight();
-CSS.highlights.set('sample', highlight);
+addEventListener('load', () => {
+  const regex = /nice book/ig;
 
-const regex = /nice book/ig;
-
-const content = {
-  parsed: document.body.innerText,
-  raw: document.body.textContent
-};
-const f = search(regex, {
-  element: document.body,
-  content
-});
-for (;;) {
-  const match = f.next();
-  if (match.done) {
-    break;
+  const docs = [document];
+  for (let i = 0; i < self.frames.length; i+=1) {
+    const frame = self.frames[i];
+    try {
+      docs.push(frame.document);
+    }
+    catch (e) {}
   }
-  const r = range(content.parsed, match.value);
 
-  highlight.add(r);
-}
+  for (const doc of docs) {
+    const highlight = new Highlight();
+    doc.defaultView.CSS.highlights.set('sample', highlight);
+
+    const content = {
+      parsed: doc.body.innerText,
+      raw: doc.body.textContent
+    };
+    console.log(content);
+
+    const f = search(regex, {
+      element: doc.body,
+      content
+    });
+    for (;;) {
+      const match = f.next();
+
+      if (match.done) {
+        break;
+      }
+      const r = range(content.parsed, match.value);
+
+      highlight.add(r);
+    }
+  }
+});

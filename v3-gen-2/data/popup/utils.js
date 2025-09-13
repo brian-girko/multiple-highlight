@@ -104,7 +104,8 @@ const utils = {
     });
     await chrome.scripting.insertCSS({
       target: {
-        tabId
+        tabId,
+        allFrames: true
       },
       css: code
     });
