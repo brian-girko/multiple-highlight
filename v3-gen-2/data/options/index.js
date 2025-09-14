@@ -23,7 +23,8 @@ const prefs = {
     'j': ['#ffeef7', '#34222c'],
     '_': ['#303b49', '#abd1ff']
   },
-  'custom-css': ''
+  'custom-css': '',
+  'navigation': 'enter'
 };
 
 chrome.storage.local.get(prefs).then(prefs => {
@@ -39,6 +40,7 @@ chrome.storage.local.get(prefs).then(prefs => {
     document.querySelector(`#${key} td:nth-child(3) input`).value = b;
   }
   document.getElementById('custom-css').value = prefs['custom-css'];
+  document.getElementById('navigation').value = prefs['navigation'];
 });
 
 document.getElementById('save').addEventListener('click', () => chrome.storage.local.set({
@@ -56,7 +58,8 @@ document.getElementById('save').addEventListener('click', () => chrome.storage.l
     ];
     return p;
   }, {}),
-  'custom-css': document.getElementById('custom-css').value
+  'custom-css': document.getElementById('custom-css').value,
+  'navigation': document.getElementById('navigation').value
 }).then(() => {
   if (document.getElementById('datalist-enabled').checked === false) {
     chrome.storage.local.get(null, prefs => {

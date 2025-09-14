@@ -143,11 +143,13 @@ chrome.storage.local.get(prefs).then(async ps => {
     };
     search.addEventListener('input', input);
     // navigate
-    search.addEventListener('keyup', e => {
-      if (e.key === 'Enter' && e.shiftKey) {
+    search.addEventListener('keydown', e => {
+      if (e.key.toLowerCase() === prefs.navigation && e.shiftKey) {
+        e.preventDefault();
         backward.click();
       }
-      else if (e.key === 'Enter') {
+      else if (e.key.toLowerCase() === prefs.navigation) {
+        e.preventDefault();
         forward.click();
       }
     });

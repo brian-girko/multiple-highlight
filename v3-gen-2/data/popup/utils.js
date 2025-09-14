@@ -32,7 +32,8 @@ const utils = {
       '_': ['#303b49', '#abd1ff']
     },
     'custom-css': '',
-    'no-active-rule': false
+    'no-active-rule': false,
+    'navigation': 'enter'
   },
   async once(tabId) {
     const r = await chrome.scripting.executeScript({
